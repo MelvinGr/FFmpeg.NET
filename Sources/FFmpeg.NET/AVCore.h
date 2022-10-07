@@ -3556,6 +3556,8 @@ public:
 	static property UInt32 Version { UInt32 get(); }
 	static property String^ Configuration { String^ get(); }
 	static property String^ License { String^ get(); }
+
+	static String^ av_version_info() { return gcnew String(::av_version_info()); }
 };
 //////////////////////////////////////////////////////
 // AVSampleFmt

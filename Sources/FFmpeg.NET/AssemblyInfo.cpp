@@ -25,7 +25,7 @@ using namespace System::Security::Permissions;
 // associated with an assembly.
 //
 [assembly:AssemblyTitleAttribute("FFMPEG.NET")];
-[assembly:AssemblyDescriptionAttribute("FFMPEG.NET Wrapper Implementation")];
+[assembly:AssemblyDescriptionAttribute("FFMPEG.NET Wrapper Implementation, " FFMPEG_VERSION)];
 [assembly:AssemblyConfigurationAttribute("")];
 [assembly:AssemblyCompanyAttribute("")];
 [assembly:AssemblyProductAttribute("FFMPEG.NET")];

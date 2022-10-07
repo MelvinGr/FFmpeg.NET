@@ -33,3 +33,10 @@
 
 *.CopyComplete
 *.cache
+
+#
+/Solutions/.vs
+/output
+/Sources/Examples/proj/obj
+/Solutions/packages
+/Sources/FFmpeg.NET/FFmpeg.NET.vcxproj.user

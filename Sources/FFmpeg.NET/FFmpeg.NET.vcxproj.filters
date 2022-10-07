@@ -9,9 +9,21 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
+    <Filter Include="Runtimes">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Runtimes\win-x64">
+      <UniqueIdentifier>{560e4ec5-f494-4891-9519-a7f2b5f3b9d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Runtimes\win-x64\native">
+      <UniqueIdentifier>{103c7ed5-64ee-4e0b-b03c-72703a500ebb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Runtimes\win-x86">
+      <UniqueIdentifier>{b0d3f0c3-e5f4-43d4-92c9-0fcf976cc899}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Runtimes\win-x86\native">
+      <UniqueIdentifier>{b855455a-43cd-4055-82b4-7213ebf13827}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -41,9 +53,6 @@
     </ClInclude>
     <ClInclude Include="Postproc.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -79,16 +88,60 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="app.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="app.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="License.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FFmpeg.NET.snk" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x86\avcodec-58.dll">
+      <Filter>Runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x86\avdevice-58.dll">
+      <Filter>Runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x86\avfilter-7.dll">
+      <Filter>Runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x86\avformat-58.dll">
+      <Filter>Runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x86\avutil-56.dll">
+      <Filter>Runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x86\postproc-55.dll">
+      <Filter>Runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x86\swresample-3.dll">
+      <Filter>Runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x86\swscale-5.dll">
+      <Filter>Runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x64\avcodec-58.dll">
+      <Filter>Runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x64\avdevice-58.dll">
+      <Filter>Runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x64\avfilter-7.dll">
+      <Filter>Runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x64\avformat-58.dll">
+      <Filter>Runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x64\avutil-56.dll">
+      <Filter>Runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x64\postproc-55.dll">
+      <Filter>Runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x64\swresample-3.dll">
+      <Filter>Runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="..\..\ThirdParty\ffmpeg\4.2.2\bin\x64\swscale-5.dll">
+      <Filter>Runtimes\win-x64\native</Filter>
+    </None>
   </ItemGroup>
 </Project>

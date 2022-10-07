@@ -7,7 +7,7 @@
 #include <atlbase.h>
 //////////////////////////////////////////////////////
 extern "C" {
-//////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////
 #ifndef AVFORMAT_AVFORMAT_H
 #	ifndef _XKEYCHECK_H
 #		define _XKEYCHECK_H
@@ -31,6 +31,8 @@ extern "C" {
 #	include <libavutil/motion_vector.h>
 #	include <libavutil/stereo3d.h>
 #	include <libavutil/timestamp.h>
+#	include <libavutil/ffversion.h>
+#	include <libavutil/avutil.h>
 #	include <libavcodec/avcodec.h>
 #	include <libavformat/avformat.h>
 #	include <libavformat/avio.h>
