@@ -23,6 +23,7 @@
 #pragma warning(disable: 4996) // marked as deprecated
 //////////////////////////////////////////////////////
 using namespace System;
+using namespace System::IO;
 using namespace System::Diagnostics;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
@@ -451,30 +452,29 @@ FFmpeg::AVBase::!AVBase()
 	}
 }
 
+void LoadLib(String^ _name, interior_ptr<HINSTANCE__*> _lib)
+{
+#undef GetCurrentDirectory
+	auto szFiles = Directory::GetFiles(Directory::GetCurrentDirectory(), _name + "*.dll");
+	if(szFiles->Length == 1)
+	{
+		pin_ptr<const wchar_t> pPath = PtrToStringChars(szFiles[0]);
+		*_lib = LoadLibraryW(pPath);
+	}
+}
+
 void FFmpeg::AVBase::EnsureLibraryLoaded()
 {
-	if (!s_bDllLoaded)
-	{
-		s_bDllLoaded = true;
-#define LoadLib(_name,_lib) { \
-			int _index = 100; while (--_index >= -1 && !AVBase::##_lib) { \
-			swprintf_s(szFileName,_countof(szFileName),(_index >= 0 ? L"%s-%d.dll" : L"%s.dll"),_name,_index); \
-			swprintf_s(szPath,_countof(szPath),L"%s%s%s",szDrive,szDir,szFileName);AVBase::##_lib = LoadLibraryW(szPath); } \
-		}
-		WCHAR szDrive[MAX_PATH], szDir[MAX_PATH], szFileName[MAX_PATH], szExt[MAX_PATH], szPath[MAX_PATH];
-		GetModuleFileNameW(NULL, szPath, MAX_PATH);
-		_wsplitpath_s(szPath, szDrive, MAX_PATH, szDir, MAX_PATH, szFileName, MAX_PATH, szExt, MAX_PATH);
-
-		LoadLib(L"avutil",m_hLibAVUtil);
-		LoadLib(L"swresample",m_hLibSwresample);
-		LoadLib(L"swscale",m_hLibSwscale);
-		LoadLib(L"postproc",m_hLibPostproc);
-		LoadLib(L"avcodec",m_hLibAVCodec);
-		LoadLib(L"avformat",m_hLibAVFormat);
-		LoadLib(L"avfilter",m_hLibAVFilter);
-		LoadLib(L"avdevice",m_hLibAVDevice);
-
-#undef LoadLib
+	if (!m_hLibAVUtil)
+	{		
+		LoadLib("avutil",     &m_hLibAVUtil);
+		LoadLib("swresample", &m_hLibSwresample);
+		LoadLib("swscale",    &m_hLibSwscale);
+		LoadLib("postproc",   &m_hLibPostproc);
+		LoadLib("avcodec",    &m_hLibAVCodec);
+		LoadLib("avformat",   &m_hLibAVFormat);
+		LoadLib("avfilter",   &m_hLibAVFilter);
+		LoadLib("avdevice",   &m_hLibAVDevice);
 	}
 }
 //////////////////////////////////////////////////////

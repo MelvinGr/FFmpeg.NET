@@ -2812,7 +2812,6 @@ private:
 	// Disposed Flag
 	bool			m_bDisposed;
 internal:
-	static bool s_bDllLoaded = false;
 	static HMODULE m_hLibAVUtil = nullptr;
 	static HMODULE m_hLibAVCodec = nullptr;
 	static HMODULE m_hLibAVFormat = nullptr;
