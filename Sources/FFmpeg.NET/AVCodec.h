@@ -100,45 +100,45 @@ public enum class AVCodecFlag : UInt32
 	None = 0,
 	/// Allow decoders to produce frames with data planes that are not aligned
 	/// to CPU requirements (e.g. due to cropping).
-	Unaligned = (1 << 0),
+	Unaligned = 1 << 0,
 	///< Use fixed qscale.
-    QScale = (1 << 1),  
+    QScale = 1 << 1,  
 	///< 4 MV per MB allowed / advanced prediction for H.263.
-    _4MV = (1 << 2),  
+    _4MV = 1 << 2,  
 	/// Output even those frames that might be corrupted.
-	OUTPUT_CORRUPT  = (1 <<  3),
+	OUTPUT_CORRUPT  = 1 <<  3,
 	///< Use qpel MC.
-    QPEL = (1 << 4),  
+    QPEL = 1 << 4,  
 	/// Don't output frames whose parameters differ from first
 	/// decoded frame in stream.
-	DROPCHANGED = (1 << 5),
+	DROPCHANGED = 1 << 5,
 	///< Use internal 2pass ratecontrol in first pass mode.
-    PASS1 = (1 << 9),
+    PASS1 = 1 << 9,
 	///< Use internal 2pass ratecontrol in second pass mode.
-    PASS2 = (1 << 10), 
+    PASS2 = 1 << 10, 
 	///< loop filter
-	LOOP_FILTER = (1 << 11), 
+	LOOP_FILTER = 1 << 11, 
 	///< Only decode/encode grayscale.
-    GRAY = (1 << 13),   
+    GRAY = 1 << 13,   
 	///< error[?] variables will be set during encoding.
-	PSNR = (1 << 15),   
+	PSNR = 1 << 15,   
 	/// Input bitstream might be truncated at a random
 	/// location instead of only at frame boundaries.
-	TRUNCATED = (1 << 16), 
+	TRUNCATED = 1 << 16, 
 	///< Use interlaced DCT.
-	INTERLACED_DCT = (1 << 18),
+	INTERLACED_DCT = 1 << 18,
 	///< Force low delay.
-	LOW_DELAY = (1 << 19), 
+	LOW_DELAY = 1 << 19, 
 	/// Place global headers in extradata instead of every keyframe.
-	GLOBAL_HEADER = (1 << 22),
+	GLOBAL_HEADER = 1 << 22,
 	///< Use only bitexact stuff (except (I)DCT).
-	BITEXACT = (1 << 23), 
+	BITEXACT = 1 << 23, 
 	/// Fx : Flag for h263+ extra options 
 	///< H.263 advanced intra coding / MPEG-4 AC prediction
-	AC_PRED = (1 << 24), 
+	AC_PRED = 1 << 24, 
 	///< interlaced motion estimation
-	INTERLACED_ME = (1 << 29), 
-	CLOSED_GOP = (1U << 31), 
+	INTERLACED_ME = 1 << 29, 
+	CLOSED_GOP = 1U << 31, 
 };
 //////////////////////////////////////////////////////
 [Flags]
@@ -147,27 +147,27 @@ public enum class AVCodecFlag2 : UInt32
 {
 	None = 0,
 	///< Allow non spec compliant speedup tricks.
-    FAST = (1 << 0), 
+    FAST = 1 << 0, 
 	///< Strictly enforce GOP size.
-	STRICT_GOP = (1 << 1), 
+	STRICT_GOP = 1 << 1, 
 	///< Skip bitstream encoding.
-    NO_OUTPUT = (1 << 2), 
+    NO_OUTPUT = 1 << 2, 
 	///< Place global headers at every keyframe instead of in extradata.
-    LOCAL_HEADER = (1 << 3), 
+    LOCAL_HEADER = 1 << 3, 
 	///< timecode is in drop frame format. DEPRECATED!!!!
-    DROP_FRAME_TIMECODE = (1 << 13), 
+    DROP_FRAME_TIMECODE = 1 << 13, 
 	///< Input bitstream might be truncated at a packet boundaries instead of only at frame boundaries.
-	CHUNKS = (1 << 15),
+	CHUNKS = 1 << 15,
 	/// Discard cropping information from SPS.
-	IGNORE_CROP = (1 << 16),
+	IGNORE_CROP = 1 << 16,
 	///< Show all frames before the first keyframe
-	SHOW_ALL = (1 << 22), 
+	SHOW_ALL = 1 << 22, 
 	/// Export motion vectors through frame side data
-	EXPORT_MVS = (1 << 28),
+	EXPORT_MVS = 1 << 28,
 	/// Do not skip samples and export skip information as frame side data
-	SKIP_MANUAL  = (1 << 29),
+	SKIP_MANUAL  = 1 << 29,
 	/// Do not reset ASS ReadOrder field on flush (subtitles decoding)
-	RO_FLUSH_NOOP  = (1 << 30),
+	RO_FLUSH_NOOP  = 1 << 30,
 };
 //////////////////////////////////////////////////////
 [Flags]
@@ -252,21 +252,21 @@ public enum class ErrorRecognition : int
 	/// decoded data, depending on the codec) and print an error message on mismatch.
 	/// If AV_EF_EXPLODE is also set, a mismatching checksum will result in the
 	/// decoder returning an error.
-    CRCCHECK = (1 << 0),
+    CRCCHECK = 1 << 0,
 	///< detect bitstream specification deviations
-    BITSTREAM = (1 << 1),
+    BITSTREAM = 1 << 1,
 	///< detect improper bitstream length
-    BUFFER = (1 << 2),
+    BUFFER = 1 << 2,
 	///< abort decoding on minor error detection
-    EXPLODE = (1 << 3),
+    EXPLODE = 1 << 3,
 	///< ignore errors and continue
-	IGNORE_ERR = (1<<15),
+	IGNORE_ERR = 1<<15,
 	///< consider things that violate the spec, are fast to calculate and have not been seen in the wild as errors
-    CAREFUL = (1 << 16),
+    CAREFUL = 1 << 16,
 	///< consider all spec non compliances as errors
-    COMPLIANT = (1 << 17),
+    COMPLIANT = 1 << 17,
 	///< consider things that a sane encoder should not do as an error
-    AGGRESSIVE = (1 << 18),
+    AGGRESSIVE = 1 << 18,
 };
 //////////////////////////////////////////////////////
 public enum class FFDct : int
@@ -577,7 +577,7 @@ public enum class AVFrameFlags : int
 {
 	None = 0,
 	/// The frame data may be corrupted, e.g. due to decoding errors.
-	CORRUPT = (1 << 0), 
+	CORRUPT = 1 << 0, 
 };
 //////////////////////////////////////////////////////
 [Flags]
@@ -716,24 +716,24 @@ public enum class ParserFlags : int
 public enum class AV_PIX_FMT_FLAG : int
 {
 	/// Pixel format is big-endian.
-	BE           = (1 << 0),
+	BE           = 1 << 0,
 	 /// Pixel format has a palette in data[1], values are indexes in this palette.
-	PAL          = (1 << 1),
+	PAL          = 1 << 1,
 	/// All values of a component are bit-wise packed end to end.
-	BITSTREAM    = (1 << 2),
+	BITSTREAM    = 1 << 2,
 	/// Pixel format is an HW accelerated format.
-	HWACCEL      = (1 << 3),
+	HWACCEL      = 1 << 3,
 	/// At least one pixel component is not in the first data plane.
-	PLANAR       = (1 << 4),
+	PLANAR       = 1 << 4,
 	/// The pixel format contains RGB-like data = (as opposed to YUV/grayscale),.
-	RGB          = (1 << 5),
+	RGB          = 1 << 5,
 	/// The pixel format is "pseudo-paletted". This means that it contains a
 	/// fixed palette in the 2nd plane but the palette is fixed/constant for each
 	/// PIX_FMT. This allows interpreting the data as if it was PAL8, which can
 	/// in some cases be simpler. Or the data can be interpreted purely based on
 	/// the pixel format without using the palette.
 	/// An example of a pseudo-paletted format is AV_PIX_FMT_GRAY8
-	PSEUDOPAL    = (1 << 6),
+	PSEUDOPAL    = 1 << 6,
 	/// The pixel format has an alpha channel. This is set on all formats that
 	/// support alpha in some way. The exception is AV_PIX_FMT_PAL8, which can
 	/// carry alpha as part of the palette. Details are explained in the
@@ -745,7 +745,7 @@ public enum class AV_PIX_FMT_FLAG : int
 	/// If a codec or a filter does not support alpha, it should set all alpha to
 	/// opaque, or use the equivalent pixel formats without alpha component, e.g.
 	/// AV_PIX_FMT_RGB0 (or AV_PIX_FMT_RGB24 etc.) instead of AV_PIX_FMT_RGBA.
-	ALPHA        = (1 << 7),
+	ALPHA        = 1 << 7,
 };
 //////////////////////////////////////////////////////
 public enum class AVPictureStructure

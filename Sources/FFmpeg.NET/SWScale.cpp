@@ -80,7 +80,7 @@ FFmpeg::SwsVector::SwsVector(array<double>^ vector)
 FFmpeg::AVArray<double>^ FFmpeg::SwsVector::coeff::get()
 {
 	auto p = ((::SwsVector *)m_pPointer)->coeff;
-	AVArray<double>^ _array = (AVArray<double>^)GetObject((IntPtr)p);
+	auto _array = (AVArray<double>^)GetObject((IntPtr)p);
 	if (_array) return _array;
 	return gcnew AVArray<double>(((::SwsVector*)m_pPointer)->coeff,this,sizeof(double),((::SwsVector*)m_pPointer)->length);
 }
@@ -92,7 +92,7 @@ int FFmpeg::SwsVector::length::get()
 //////////////////////////////////////////////////////
 array<double>^ FFmpeg::SwsVector::ToArray()
 {
-	List<double>^ _list = gcnew List<double>();
+	auto _list = gcnew List<double>();
 	for (int i = 0; i < ((::SwsVector*)m_pPointer)->length; i++)
 	{
 		_list->Add(((::SwsVector*)m_pPointer)->coeff[i]);
@@ -117,13 +117,13 @@ void FFmpeg::SwsVector::Conv(SwsVector^ b)
 	}
 	else
 	{
-		::SwsVector * a = (::SwsVector *)m_pPointer;
-		::SwsVector * v = (::SwsVector *)b->_Pointer.ToPointer();
+		auto a = (::SwsVector *)m_pPointer;
+		auto v = (::SwsVector *)b->_Pointer.ToPointer();
 		int length = a->length + v->length - 1;
 		::SwsVector * vec = sws_allocVec(length);
 		if (vec)
 		{
-			memset(vec->coeff,0x00,vec->length * sizeof(vec->coeff[0]));
+			memset(vec->coeff,0x00,vec->length * sizeof vec->coeff[0]);
 			for (int i = 0; i < a->length; i++) {
 				for (int j = 0; j < v->length; j++) {
 					vec->coeff[i + j] += a->coeff[i] * v->coeff[j];
@@ -146,13 +146,13 @@ void FFmpeg::SwsVector::Add(SwsVector^ b)
 	}
 	else
 	{
-		::SwsVector * a = (::SwsVector *)m_pPointer;
-		::SwsVector * v = (::SwsVector *)b->_Pointer.ToPointer();
+		auto a = (::SwsVector *)m_pPointer;
+		auto v = (::SwsVector *)b->_Pointer.ToPointer();
 		int length = a->length > v->length ? a->length : v->length;
 		::SwsVector * vec = sws_allocVec(length);
 		if (vec)
 		{
-			memset(vec->coeff,0x00,vec->length * sizeof(vec->coeff[0]));
+			memset(vec->coeff,0x00,vec->length * sizeof vec->coeff[0]);
 			for (int i = 0; i < a->length; i++)
 				vec->coeff[i + (length - 1) / 2 - (a->length - 1) / 2] += a->coeff[i];
 			for (int i = 0; i < v->length; i++)
@@ -173,13 +173,13 @@ void FFmpeg::SwsVector::Sub(SwsVector^ b)
 	}
 	else
 	{
-		::SwsVector * a = (::SwsVector *)m_pPointer;
-		::SwsVector * v = (::SwsVector *)b->_Pointer.ToPointer();
+		auto a = (::SwsVector *)m_pPointer;
+		auto v = (::SwsVector *)b->_Pointer.ToPointer();
 		int length = a->length > v->length ? a->length : v->length;
 		::SwsVector * vec = sws_allocVec(length);
 		if (vec)
 		{
-			memset(vec->coeff,0x00,vec->length * sizeof(vec->coeff[0]));
+			memset(vec->coeff,0x00,vec->length * sizeof vec->coeff[0]);
 			for (int i = 0; i < a->length; i++)
 				vec->coeff[i + (length - 1) / 2 - (a->length - 1) / 2] += a->coeff[i];
 			for (int i = 0; i < v->length; i++)
@@ -200,12 +200,12 @@ void FFmpeg::SwsVector::Shift(int shift)
 	}
 	else
 	{
-		::SwsVector * a = (::SwsVector *)m_pPointer;
+		auto a = (::SwsVector *)m_pPointer;
 		int length = a->length + Math::Abs(shift) * 2;
 		::SwsVector * vec = sws_allocVec(length);
 		if (vec)
 		{
-			memset(vec->coeff,0x00,vec->length * sizeof(vec->coeff[0]));
+			memset(vec->coeff,0x00,vec->length * sizeof vec->coeff[0]);
 			for (int i = 0; i < a->length; i++) {
 				vec->coeff[i + (length    - 1) / 2 -
 					(a->length - 1) / 2 - shift] = a->coeff[i];
@@ -246,22 +246,22 @@ Object^ FFmpeg::SwsVector::Clone()
 	}
 	else
 	{
-		::SwsVector* src = (::SwsVector*)m_pPointer;
+		auto src = (::SwsVector*)m_pPointer;
 		v = sws_allocVec(src->length);
 		if (v)
 		{
-			memcpy(v->coeff, src->coeff, v->length * sizeof(v->coeff[0]));
+			memcpy(v->coeff, src->coeff, v->length * sizeof v->coeff[0]);
 		}
 	}
 	if (!v) return nullptr;
-	SwsVector^ _vector = gcnew SwsVector(v,nullptr);
+	auto _vector = gcnew SwsVector(v,nullptr);
 	_vector->m_pFree = (TFreeFN *)sws_freeVec;
 	return _vector;
 }
 //////////////////////////////////////////////////////
 FFmpeg::SwsVector^ FFmpeg::SwsVector::GetGaussianVec(double variance, double quality)
 {
-	SwsVector^ _vector = gcnew SwsVector(sws_getGaussianVec(variance,quality),nullptr);
+	auto _vector = gcnew SwsVector(sws_getGaussianVec(variance,quality),nullptr);
 	_vector->m_pFree = (TFreeFN *)sws_freeVec;
 	return _vector;
 }
@@ -285,7 +285,7 @@ FFmpeg::SwsVector^ FFmpeg::SwsVector::GetConstVec(double c, int length)
 		}
 	}
 	if (!v) return nullptr;
-	SwsVector^ _vector = gcnew SwsVector(v,nullptr);
+	auto _vector = gcnew SwsVector(v,nullptr);
 	_vector->m_pFree = (TFreeFN *)sws_freeVec;
 	return _vector;
 }
@@ -306,7 +306,7 @@ FFmpeg::SwsVector^ FFmpeg::SwsVector::GetIdentityVec(void)
 		}
 	}
 	if (!v) return nullptr;
-	SwsVector^ _vector = gcnew SwsVector(v,nullptr);
+	auto _vector = gcnew SwsVector(v,nullptr);
 	_vector->m_pFree = (TFreeFN *)sws_freeVec;
 	return _vector;
 }
@@ -420,7 +420,7 @@ FFmpeg::SwsContext::SwsContext(int srcW, int srcH, AVPixelFormat srcFormat,
 FFmpeg::SwsContext::SwsContext(AVFrame^ src,AVFrame^ dst,SwsFlags flags)
 	: AVBase(nullptr,nullptr)
 {
-	Init(src->width,src->height,(AVPixelFormat)src->format,dst->width,dst->height,(AVPixelFormat)dst->format,flags,nullptr,nullptr,nullptr);
+	Init(src->width,src->height,src->format,dst->width,dst->height,dst->format,flags,nullptr,nullptr,nullptr);
 }
 
 FFmpeg::SwsContext::SwsContext(AVCodecContext^ src,AVCodecContext^ dst,SwsFlags flags)
@@ -440,7 +440,7 @@ void FFmpeg::SwsContext::Init(int srcW, int srcH, AVPixelFormat srcFormat,
 		m_pPointer = nullptr;
 	}
 	pin_ptr< double > p = param == nullptr ? nullptr : &*param;
-	m_pPointer = sws_getContext(srcW,srcH,(::AVPixelFormat)srcFormat,dstW,dstH,(::AVPixelFormat)dstFormat,
+	m_pPointer = sws_getContext(srcW,srcH,srcFormat,dstW,dstH,dstFormat,
 		(int)flags,srcFilter != nullptr ? (::SwsFilter*)srcFilter->_Pointer.ToPointer() : nullptr,
 		dstFilter != nullptr ? (::SwsFilter*)dstFilter->_Pointer.ToPointer() : nullptr,p);
 	m_pFree = (TFreeFN *)sws_freeContext;
@@ -472,7 +472,7 @@ int FFmpeg::SwsContext::srcW::get()
 }
 void FFmpeg::SwsContext::srcW::set(int value)
 {
-	av_opt_set_int(m_pPointer,"srcw",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"srcw",value,0);
 }
 
 int FFmpeg::SwsContext::srcH::get()
@@ -486,7 +486,7 @@ int FFmpeg::SwsContext::srcH::get()
 }
 void FFmpeg::SwsContext::srcH::set(int value)
 {
-	av_opt_set_int(m_pPointer,"srch",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"srch",value,0);
 }
 
 int FFmpeg::SwsContext::dstW::get()
@@ -500,7 +500,7 @@ int FFmpeg::SwsContext::dstW::get()
 }
 void FFmpeg::SwsContext::dstW::set(int value)
 {
-	av_opt_set_int(m_pPointer,"dstw",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"dstw",value,0);
 }
 int FFmpeg::SwsContext::dstH::get()
 {
@@ -513,7 +513,7 @@ int FFmpeg::SwsContext::dstH::get()
 }
 void FFmpeg::SwsContext::dstH::set(int value)
 {
-	av_opt_set_int(m_pPointer,"dsth",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"dsth",value,0);
 }
 
 FFmpeg::AVPixelFormat FFmpeg::SwsContext::srcFormat::get()
@@ -566,7 +566,7 @@ bool FFmpeg::SwsContext::Gamma::get()
 }
 void FFmpeg::SwsContext::Gamma::set(bool value)
 {
-	av_opt_set_int(m_pPointer,"gamma",(int64_t)(value ? 1 : 0),0);
+	av_opt_set_int(m_pPointer,"gamma",value ? 1 : 0,0);
 }
 //////////////////////////////////////////////////////
 FFmpeg::AVRESULT FFmpeg::SwsContext::Init(SwsFilter^ srcFilter,SwsFilter^ dstFilter)
@@ -599,7 +599,7 @@ int FFmpeg::SwsContext::Scale(AVPicture^ src, int srcSliceY, int srcSliceH, arra
 	int dstLinesize[4] = {0,0,0,0};
 	for (int i = 0; i < dst->Length && i < _countof(dstData); i++) { dstData[i] = (uint8_t *)dst[i].ToPointer(); }
 	for (int i = 0; i < dstStride->Length && i < _countof(dstLinesize); i++) { dstLinesize[i] = dstStride[i]; }
-	::AVPicture* _src = (::AVPicture*)src->_Pointer.ToPointer();
+	auto _src = (::AVPicture*)src->_Pointer.ToPointer();
 	return sws_scale((::SwsContext *)m_pPointer,_src->data,_src->linesize,srcSliceY,srcSliceH,dstData,dstLinesize);
 }
 
@@ -609,14 +609,14 @@ int FFmpeg::SwsContext::Scale(array<IntPtr>^ srcSlice, array<int>^ srcStride, in
 	int srcLinesize[4] = {0,0,0,0};
 	for (int i = 0; i < srcSlice->Length && i < _countof(srcData); i++) { srcData[i] = (uint8_t *)srcSlice[i].ToPointer(); }
 	for (int i = 0; i < srcStride->Length && i < _countof(srcLinesize); i++) { srcLinesize[i] = srcStride[i]; }
-	::AVPicture* _dst = (::AVPicture*)dst->_Pointer.ToPointer();
+	auto _dst = (::AVPicture*)dst->_Pointer.ToPointer();
 	return sws_scale((::SwsContext *)m_pPointer,srcData,srcLinesize,srcSliceY,srcSliceH,_dst->data,_dst->linesize);
 }
 
 int FFmpeg::SwsContext::Scale(AVPicture^ src,int srcSliceY, int srcSliceH,AVPicture^ dst)
 {
-	::AVPicture* _src = (::AVPicture*)src->_Pointer.ToPointer();
-	::AVPicture* _dst = (::AVPicture*)dst->_Pointer.ToPointer();
+	auto _src = (::AVPicture*)src->_Pointer.ToPointer();
+	auto _dst = (::AVPicture*)dst->_Pointer.ToPointer();
 	return sws_scale((::SwsContext *)m_pPointer,_src->data,_src->linesize,srcSliceY,srcSliceH,_dst->data,_dst->linesize);
 }
 //////////////////////////////////////////////////////
@@ -634,7 +634,7 @@ bool FFmpeg::SwsContext::SetColorspaceDetails(array<int>^ inv_table,
 	{
 		for (int i = 0; i < table->Length; i++) { _table[i] = table[i]; }
 	}
-	return (-1 != sws_setColorspaceDetails((::SwsContext*)m_pPointer,_inv_table,srcRange,_table, dstRange,brightness, contrast, saturation));
+	return -1 != sws_setColorspaceDetails((::SwsContext*)m_pPointer,_inv_table,srcRange,_table, dstRange,brightness, contrast, saturation);
 }
 bool FFmpeg::SwsContext::GetColorspaceDetails(array<int>^ % inv_table,
 						  int* srcRange,array<int>^ % table, int* dstRange,
@@ -646,7 +646,7 @@ bool FFmpeg::SwsContext::GetColorspaceDetails(array<int>^ % inv_table,
 	int _result = sws_getColorspaceDetails((::SwsContext*)m_pPointer,(int**)&_inv_table,&_srcRange,(int**)&_table,&_dstRange,&_brightness,&_contrast,&_saturation);
 	if (_result != -1)
 	{
-		List<int>^ _list = gcnew List<int>();
+		auto _list = gcnew List<int>();
 		for (int i = 0; i < 4; i++) _list->Add(_inv_table[i]);
 		inv_table = _list->ToArray();
 		_list->Clear();
@@ -659,20 +659,20 @@ bool FFmpeg::SwsContext::GetColorspaceDetails(array<int>^ % inv_table,
 		if (contrast) *contrast = _contrast;
 		if (saturation) *saturation = _saturation;
 	}
-	return (_result != -1);
+	return _result != -1;
 }
 //////////////////////////////////////////////////////
 bool FFmpeg::SwsContext::IsSupportedInput(AVPixelFormat pix_fmt)
 {
-	return sws_isSupportedInput((::AVPixelFormat)pix_fmt) != 0;
+	return sws_isSupportedInput(pix_fmt) != 0;
 }
 bool FFmpeg::SwsContext::IsSupportedOutput(AVPixelFormat pix_fmt)
 {
-	return sws_isSupportedOutput((::AVPixelFormat)pix_fmt) != 0;
+	return sws_isSupportedOutput(pix_fmt) != 0;
 }
 bool FFmpeg::SwsContext::IsSupportedEndiannessConversion(AVPixelFormat pix_fmt)
 {
-	return sws_isSupportedEndiannessConversion((::AVPixelFormat)pix_fmt) != 0;
+	return sws_isSupportedEndiannessConversion(pix_fmt) != 0;
 }
 //////////////////////////////////////////////////////
 void FFmpeg::SwsContext::ConvertPalette8ToPacked32(IntPtr src, IntPtr dst, int num_pixels, IntPtr palette)

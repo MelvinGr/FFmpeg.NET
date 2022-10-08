@@ -59,7 +59,7 @@ public enum class AvioFlag : int
 	///</summary>
 	READ = 1,                                      ///<summary>< read-only ///</summary>
 	WRITE = 2,                                      ///<summary>< write-only ///</summary>
-	READ_WRITE = (READ | WRITE),  ///<summary>< read-write pseudo flag ///</summary>
+	READ_WRITE = READ | WRITE,  ///<summary>< read-write pseudo flag ///</summary>
 	///<summary>
 	/// @}
 	///</summary>
@@ -881,8 +881,8 @@ public ref class AVProbeData : public AVBase
 public:
 	///< maximum score, half of that is used for file-extension-based detection
 	static const int SCORE_MAX = 100;
-	static const int SCORE_RETRY = (SCORE_MAX/4);
-	static const int SCORE_STREAM_RETRY = (SCORE_MAX/4-1);
+	static const int SCORE_RETRY = SCORE_MAX/4;
+	static const int SCORE_STREAM_RETRY = SCORE_MAX/4-1;
 	///< score for file extension
 	static const int SCORE_EXTENSION = 50;
 	///< score for file mime type

@@ -129,7 +129,7 @@ FFmpeg::AVDeviceCapabilitiesQuery::~AVDeviceCapabilitiesQuery()
 {
 	if (m_pPointer && m_pFormatContext)
 	{
-		::AVDeviceCapabilitiesQuery * _caps = (::AVDeviceCapabilitiesQuery *)m_pPointer;
+		auto _caps = (::AVDeviceCapabilitiesQuery *)m_pPointer;
 		avdevice_capabilities_free(&_caps, (::AVFormatContext*)m_pFormatContext->_Pointer.ToPointer());
 		m_pPointer = nullptr;
 		m_pFormatContext = nullptr;
@@ -142,7 +142,7 @@ FFmpeg::AVClass^ FFmpeg::AVDeviceCapabilitiesQuery::av_class::get()
 }
 FFmpeg::AVFormatContext^ FFmpeg::AVDeviceCapabilitiesQuery::device_context::get()
 {
-	return _CreateObject<AVFormatContext>((void*)((::AVDeviceCapabilitiesQuery*)m_pPointer)->device_context);
+	return _CreateObject<AVFormatContext>(((::AVDeviceCapabilitiesQuery*)m_pPointer)->device_context);
 }
 FFmpeg::AVCodecID FFmpeg::AVDeviceCapabilitiesQuery::codec::get()
 {
@@ -154,7 +154,7 @@ void FFmpeg::AVDeviceCapabilitiesQuery::codec::set(AVCodecID value)
 }
 FFmpeg::AVSampleFormat FFmpeg::AVDeviceCapabilitiesQuery::sample_format::get()
 {
-	return (AVSampleFormat)((::AVDeviceCapabilitiesQuery*)m_pPointer)->sample_format;
+	return ((::AVDeviceCapabilitiesQuery*)m_pPointer)->sample_format;
 }
 void FFmpeg::AVDeviceCapabilitiesQuery::sample_format::set(AVSampleFormat value)
 {
@@ -162,7 +162,7 @@ void FFmpeg::AVDeviceCapabilitiesQuery::sample_format::set(AVSampleFormat value)
 }
 FFmpeg::AVPixelFormat FFmpeg::AVDeviceCapabilitiesQuery::pixel_format::get()
 {
-	return (AVPixelFormat)((::AVDeviceCapabilitiesQuery*)m_pPointer)->pixel_format;
+	return ((::AVDeviceCapabilitiesQuery*)m_pPointer)->pixel_format;
 }
 void FFmpeg::AVDeviceCapabilitiesQuery::pixel_format::set(AVPixelFormat value)
 {
@@ -286,8 +286,7 @@ String^ FFmpeg::AVDeviceInfo::ToString()
 {
 	if (m_pPointer)
 	{
-		String^ _name;
-		_name = device_name;
+		String^ _name = device_name;
 		if (!String::IsNullOrEmpty(_name)) return _name;
 		_name = device_description;
 		if (!String::IsNullOrEmpty(_name)) return _name;
@@ -341,7 +340,7 @@ FFmpeg::AVDeviceInfoList::AVDeviceInfoList(void * _pointer,AVBase^ _parent)
 FFmpeg::AVDeviceInfo^ FFmpeg::AVDeviceInfoList::default::get(int index)
 {
 	if (index < 0 || index > Count) throw gcnew ArgumentOutOfRangeException();
-	::AVDeviceInfo ** p = (::AVDeviceInfo **)((::AVDeviceInfoList*)m_pPointer)->devices;
+	auto p = ((::AVDeviceInfoList*)m_pPointer)->devices;
 	return _CreateObject<AVDeviceInfo>(p[index]);
 }
 int FFmpeg::AVDeviceInfoList::Count::get()
@@ -359,7 +358,7 @@ int FFmpeg::AVDeviceInfoList::default_device::get()
 //////////////////////////////////////////////////////
 array<FFmpeg::AVDeviceInfo^>^ FFmpeg::AVDeviceInfoList::ToArray()
 {
-	List<AVDeviceInfo^>^ _list = gcnew List<AVDeviceInfo^>();
+	auto _list = gcnew List<AVDeviceInfo^>();
 	try
 	{
 		for (int i = 0; i < Count; i++)
@@ -458,7 +457,7 @@ FFmpeg::AVDeviceInfoList^ FFmpeg::AVDevices::list_devices(AVFormatContext^ s)
 	::AVDeviceInfoList * device_list = nullptr;
 	if (0 < avdevice_list_devices(s != nullptr ? (::AVFormatContext *)s->_Pointer.ToPointer() : nullptr, &device_list) && device_list)
 	{
-		AVDeviceInfoList^ _list = gcnew AVDeviceInfoList(device_list,nullptr);
+		auto _list = gcnew AVDeviceInfoList(device_list,nullptr);
 		_list->m_pFreep = (AVBase::TFreeFNP*)avdevice_free_list_devices;
 		return _list;
 	}
@@ -476,7 +475,7 @@ FFmpeg::AVDeviceInfoList^ FFmpeg::AVDevices::list_input_sources(AVInputFormat^ d
 		::AVDeviceInfoList * device_list = nullptr;
 		if (0 < avdevice_list_input_sources(device != nullptr ? (::AVInputFormat *)device->_Pointer.ToPointer() : nullptr,szName,_dict,&device_list) && device_list)
 		{
-			AVDeviceInfoList^ _list = gcnew AVDeviceInfoList(device_list,nullptr);
+			auto _list = gcnew AVDeviceInfoList(device_list,nullptr);
 			_list->m_pFreep = (AVBase::TFreeFNP*)avdevice_free_list_devices;
 			if (device_options)
 			{
@@ -509,7 +508,7 @@ FFmpeg::AVDeviceInfoList^ FFmpeg::AVDevices::list_output_sinks(AVOutputFormat^ d
 		::AVDeviceInfoList * device_list = nullptr;
 		if (0 < avdevice_list_output_sinks(device != nullptr ? (::AVOutputFormat *)device->_Pointer.ToPointer() : nullptr,szName,_dict,&device_list) && device_list)
 		{
-			AVDeviceInfoList^ _list = gcnew AVDeviceInfoList(device_list,nullptr);
+			auto _list = gcnew AVDeviceInfoList(device_list,nullptr);
 			_list->m_pFreep = (AVBase::TFreeFNP*)avdevice_free_list_devices;
 			if (device_options)
 			{

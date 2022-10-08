@@ -628,17 +628,17 @@ public enum class AVCodecProp: int
 	/// Codec uses only intra compression.
 	/// Video codecs only.
 	///</summary>
-	IntraOnly = (1 << 0),
+	IntraOnly = 1 << 0,
 	///<summary>
 	/// Codec supports lossy compression. Audio and video codecs only.
 	/// @note a codec may support both lossy and lossless
 	/// compression modes
 	///</summary>
-	Lossy = (1 << 1),
+	Lossy = 1 << 1,
 	///<summary>
 	/// Codec supports lossless compression. Audio and video codecs only.
 	///</summary>
-	Lossless = (1 << 2),
+	Lossless = 1 << 2,
 	/**
 		* Codec supports frame reordering. That is, the coded order (the order in which
 		* the encoded packets are output by the encoders / stored / input to the
@@ -648,17 +648,17 @@ public enum class AVCodecProp: int
 		* For codecs that do not have this property set, PTS and DTS should always be
 		* equal.
 		*/
-	Reorder       = (1 << 3),
+	Reorder       = 1 << 3,
 	/**
 		* Subtitle codec is bitmap based
 		* Decoded AVSubtitle data can be read from the AVSubtitleRect->pict field.
 		*/
-	BitmapSub    = (1 << 16),
+	BitmapSub    = 1 << 16,
 	/**
 		* Subtitle codec is text based.
 		* Decoded AVSubtitle data can be read from the AVSubtitleRect->ass field.
 		*/
-	TextSub      = (1 << 17)
+	TextSub      = 1 << 17
 };
 //////////////////////////////////////////////////////
 ///<summary>
@@ -1430,7 +1430,7 @@ public:
 	static explicit operator AVSampleFormat(unsigned int a) { return AVSampleFormat((int)a); }
 internal:
 	static operator ::AVSampleFormat(AVSampleFormat a) { return (::AVSampleFormat)a.m_nValue; }
-	static operator AVSampleFormat(::AVSampleFormat a) { return AVSampleFormat((int)a); }
+	static operator AVSampleFormat(::AVSampleFormat a) { return AVSampleFormat(a); }
 public:
 	virtual String^ ToString() override;
 public:
@@ -1506,9 +1506,9 @@ public enum class MbType : int
     P1L0 = 0x2000,
     P0L1 = 0x4000,
     P1L1 = 0x8000,
-    L0 = (P0L0 | P1L0),
-    L1 = (P0L1 | P1L1),
-    L0L1 = (L0 | L1),
+    L0 = P0L0 | P1L0,
+    L1 = P0L1 | P1L1,
+    L0L1 = L0 | L1,
     QUANT = 0x00010000,
     CBP = 0x00020000,
 };
@@ -1521,16 +1521,16 @@ public enum class MbType : int
 public enum class AVCodecCap : UInt32
 {
 	///< Decoder can use draw_horiz_band callback.
-	DRAW_HORIZ_BAND = (1 <<  0), 
+	DRAW_HORIZ_BAND = 1 <<  0, 
 	///<summary>
 	/// Codec uses get_buffer() for allocating buffers and supports custom allocators.
 	/// If not set, it might not use get_buffer() at all or use operations that
 	/// assume the buffer was allocated by avcodec_default_get_buffer.
 	///</summary>
-	DR1 = (1 <<  1),
-	TRUNCATED = (1 <<  3),
+	DR1 = 1 <<  1,
+	TRUNCATED = 1 <<  3,
 	///<summary> Codec can export data for HW decoding (XvMC). ///</summary>
-	HWACCEL = (1 <<  4),
+	HWACCEL = 1 <<  4,
 	///<summary>
 	/// Encoder or decoder requires flushing with NULL input at the end in order to
 	/// give the complete and correct output.
@@ -1554,12 +1554,12 @@ public enum class AVCodecCap : UInt32
 	///       each output packet. If this flag is not set, the pts and duration will
 	///       be determined by libavcodec from the input frame.
 	///</summary>
-	DELAY = (1 <<  5),
+	DELAY = 1 <<  5,
 	///<summary>
 	/// Codec can be fed a final frame with a smaller size.
 	/// This can be used to prevent truncation of the last audio samples.
 	///</summary>
-	SMALL_LAST_FRAME = (1 <<  6),
+	SMALL_LAST_FRAME = 1 <<  6,
 	///<summary>
 	/// Codec can export data for HW decoding (VDPAU).
 	///</summary>
@@ -1575,40 +1575,40 @@ public enum class AVCodecCap : UInt32
 	/// prohibiting stream copy in many cases thus it should only be considered
 	/// as a last resort.
 	///</summary>
-	SUBFRAMES = (1 <<  8),
+	SUBFRAMES = 1 <<  8,
 	///<summary>
 	/// Codec is experimental and is thus avoided in favor of non experimental
 	/// encoders
 	///</summary>
-	EXPERIMENTAL = (1 <<  9),
+	EXPERIMENTAL = 1 <<  9,
 	///<summary>
 	/// Codec should fill in channel configuration and samplerate instead of container
 	///</summary>
-	CHANNEL_CONF = (1 << 10),
+	CHANNEL_CONF = 1 << 10,
 	///<summary>
 	/// Codec is able to deal with negative linesizes
 	///</summary>
-	NEG_LINESIZES = (1 << 11),
+	NEG_LINESIZES = 1 << 11,
 	///<summary>
 	/// Codec supports frame-level multithreading.
 	///</summary>
-	FRAME_THREADS = (1 << 12),
+	FRAME_THREADS = 1 << 12,
 	///<summary>
 	/// Codec supports slice-based (or partition-based) multithreading.
 	///</summary>
-	SLICE_THREADS = (1 << 13),
+	SLICE_THREADS = 1 << 13,
 	///<summary>
 	/// Codec supports changed parameters at any point.
 	///</summary>
-	PARAM_CHANGE = (1 << 14),
+	PARAM_CHANGE = 1 << 14,
 	///<summary>
 	/// Codec supports avctx->thread_count == 0 (auto).
 	///</summary>
-	AUTO_THREADS = (1 << 15),
+	AUTO_THREADS = 1 << 15,
 	///<summary>
 	/// Audio encoder supports receiving a different number of samples in each call.
 	///</summary>
-	VARIABLE_FRAME_SIZE = (1 << 16),
+	VARIABLE_FRAME_SIZE = 1 << 16,
 	///<summary>
 	/// Decoder is not a preferred choice for probing.
 	/// This indicates that the decoder is not a good choice for probing.
@@ -1618,7 +1618,7 @@ public enum class AVCodecCap : UInt32
 	/// A decoder marked with this flag should only be used as last resort
 	/// choice for probing.
 	///</summary>
-	AVOID_PROBING = (1 << 17),
+	AVOID_PROBING = 1 << 17,
 	///<summary>
 	/// Codec is intra only.
 	///</summary>
@@ -1630,15 +1630,15 @@ public enum class AVCodecCap : UInt32
 	/// Codec is backed by a hardware implementation. Typically used to
 	/// identify a non-hwaccel hardware decoder. For information about hwaccels, use
 	/// avcodec_get_hw_config() instead.
-	HARDWARE           = (1 << 18),
+	HARDWARE           = 1 << 18,
 	/// Codec is potentially backed by a hardware implementation, but not
 	/// necessarily. This is used instead of AV_CODEC_CAP_HARDWARE, if the
 	/// implementation provides some sort of internal fallback.
-	HYBRID             = (1 << 19),
+	HYBRID             = 1 << 19,
 	/// This codec takes the reordered_opaque field from input AVFrames
 	/// and returns it in the corresponding field in AVCodecContext after
 	/// encoding.
-	ENCODER_REORDERED_OPAQUE = (1 << 20),
+	ENCODER_REORDERED_OPAQUE = 1 << 20,
 };
 //////////////////////////////////////////////////////
 // AV_CH_*
@@ -1678,33 +1678,33 @@ public:
 	static const AVChannelLayout LAYOUT_NATIVE = 0x8000000000000000;
 
 	// defgroup channel_mask_c Audio channel convenience macros
-	static const AVChannelLayout LAYOUT_MONO = (FRONT_CENTER);
-	static const AVChannelLayout LAYOUT_STEREO = (FRONT_LEFT | FRONT_RIGHT);
-	static const AVChannelLayout LAYOUT_2POINT1 = (LAYOUT_STEREO | LOW_FREQUENCY);
-	static const AVChannelLayout LAYOUT_2_1 = (LAYOUT_STEREO | BACK_CENTER);
-	static const AVChannelLayout LAYOUT_SURROUND = (LAYOUT_STEREO | FRONT_CENTER);
-	static const AVChannelLayout LAYOUT_3POINT1 = (LAYOUT_SURROUND | LOW_FREQUENCY);
-	static const AVChannelLayout LAYOUT_4POINT0 = (LAYOUT_SURROUND | BACK_CENTER);
-	static const AVChannelLayout LAYOUT_4POINT1 = (LAYOUT_4POINT0 | LOW_FREQUENCY);
-	static const AVChannelLayout LAYOUT_2_2 = (LAYOUT_STEREO | SIDE_LEFT | SIDE_RIGHT);
-	static const AVChannelLayout LAYOUT_QUAD = (LAYOUT_STEREO | BACK_LEFT | BACK_RIGHT);
-	static const AVChannelLayout LAYOUT_5POINT0 = (LAYOUT_SURROUND | SIDE_LEFT | SIDE_RIGHT);
-	static const AVChannelLayout LAYOUT_5POINT1 = (LAYOUT_5POINT0 | LOW_FREQUENCY);
-	static const AVChannelLayout LAYOUT_5POINT0_BACK = (LAYOUT_SURROUND | BACK_LEFT | BACK_RIGHT);
-	static const AVChannelLayout LAYOUT_5POINT1_BACK = (LAYOUT_5POINT0_BACK | LOW_FREQUENCY);
-	static const AVChannelLayout LAYOUT_6POINT0 = (LAYOUT_5POINT0 | BACK_CENTER);
-	static const AVChannelLayout LAYOUT_6POINT0_FRONT = (LAYOUT_2_2 | FRONT_LEFT_OF_CENTER | FRONT_RIGHT_OF_CENTER);
-	static const AVChannelLayout LAYOUT_HEXAGONAL = (LAYOUT_5POINT0_BACK | BACK_CENTER);
-	static const AVChannelLayout LAYOUT_6POINT1 = (LAYOUT_5POINT1 | BACK_CENTER);
-	static const AVChannelLayout LAYOUT_6POINT1_BACK = (LAYOUT_5POINT1_BACK | BACK_CENTER);
-	static const AVChannelLayout LAYOUT_6POINT1_FRONT = (LAYOUT_6POINT0_FRONT | LOW_FREQUENCY);
-	static const AVChannelLayout LAYOUT_7POINT0 = (LAYOUT_5POINT0 | BACK_LEFT | BACK_RIGHT);
-	static const AVChannelLayout LAYOUT_7POINT0_FRONT = (LAYOUT_5POINT0 | FRONT_LEFT_OF_CENTER | FRONT_RIGHT_OF_CENTER);
-	static const AVChannelLayout LAYOUT_7POINT1 = (LAYOUT_5POINT1 | BACK_LEFT | BACK_RIGHT);
-	static const AVChannelLayout LAYOUT_7POINT1_WIDE = (LAYOUT_5POINT1 | FRONT_LEFT_OF_CENTER | FRONT_RIGHT_OF_CENTER);
-	static const AVChannelLayout LAYOUT_7POINT1_WIDE_BACK = (LAYOUT_5POINT1_BACK | FRONT_LEFT_OF_CENTER | FRONT_RIGHT_OF_CENTER);
-	static const AVChannelLayout LAYOUT_OCTAGONAL = (LAYOUT_5POINT0 | BACK_LEFT | BACK_CENTER | BACK_RIGHT);
-	static const AVChannelLayout LAYOUT_STEREO_DOWNMIX = (STEREO_LEFT | STEREO_RIGHT);
+	static const AVChannelLayout LAYOUT_MONO = FRONT_CENTER;
+	static const AVChannelLayout LAYOUT_STEREO = FRONT_LEFT | FRONT_RIGHT;
+	static const AVChannelLayout LAYOUT_2POINT1 = LAYOUT_STEREO | LOW_FREQUENCY;
+	static const AVChannelLayout LAYOUT_2_1 = LAYOUT_STEREO | BACK_CENTER;
+	static const AVChannelLayout LAYOUT_SURROUND = LAYOUT_STEREO | FRONT_CENTER;
+	static const AVChannelLayout LAYOUT_3POINT1 = LAYOUT_SURROUND | LOW_FREQUENCY;
+	static const AVChannelLayout LAYOUT_4POINT0 = LAYOUT_SURROUND | BACK_CENTER;
+	static const AVChannelLayout LAYOUT_4POINT1 = LAYOUT_4POINT0 | LOW_FREQUENCY;
+	static const AVChannelLayout LAYOUT_2_2 = LAYOUT_STEREO | SIDE_LEFT | SIDE_RIGHT;
+	static const AVChannelLayout LAYOUT_QUAD = LAYOUT_STEREO | BACK_LEFT | BACK_RIGHT;
+	static const AVChannelLayout LAYOUT_5POINT0 = LAYOUT_SURROUND | SIDE_LEFT | SIDE_RIGHT;
+	static const AVChannelLayout LAYOUT_5POINT1 = LAYOUT_5POINT0 | LOW_FREQUENCY;
+	static const AVChannelLayout LAYOUT_5POINT0_BACK = LAYOUT_SURROUND | BACK_LEFT | BACK_RIGHT;
+	static const AVChannelLayout LAYOUT_5POINT1_BACK = LAYOUT_5POINT0_BACK | LOW_FREQUENCY;
+	static const AVChannelLayout LAYOUT_6POINT0 = LAYOUT_5POINT0 | BACK_CENTER;
+	static const AVChannelLayout LAYOUT_6POINT0_FRONT = LAYOUT_2_2 | FRONT_LEFT_OF_CENTER | FRONT_RIGHT_OF_CENTER;
+	static const AVChannelLayout LAYOUT_HEXAGONAL = LAYOUT_5POINT0_BACK | BACK_CENTER;
+	static const AVChannelLayout LAYOUT_6POINT1 = LAYOUT_5POINT1 | BACK_CENTER;
+	static const AVChannelLayout LAYOUT_6POINT1_BACK = LAYOUT_5POINT1_BACK | BACK_CENTER;
+	static const AVChannelLayout LAYOUT_6POINT1_FRONT = LAYOUT_6POINT0_FRONT | LOW_FREQUENCY;
+	static const AVChannelLayout LAYOUT_7POINT0 = LAYOUT_5POINT0 | BACK_LEFT | BACK_RIGHT;
+	static const AVChannelLayout LAYOUT_7POINT0_FRONT = LAYOUT_5POINT0 | FRONT_LEFT_OF_CENTER | FRONT_RIGHT_OF_CENTER;
+	static const AVChannelLayout LAYOUT_7POINT1 = LAYOUT_5POINT1 | BACK_LEFT | BACK_RIGHT;
+	static const AVChannelLayout LAYOUT_7POINT1_WIDE = LAYOUT_5POINT1 | FRONT_LEFT_OF_CENTER | FRONT_RIGHT_OF_CENTER;
+	static const AVChannelLayout LAYOUT_7POINT1_WIDE_BACK = LAYOUT_5POINT1_BACK | FRONT_LEFT_OF_CENTER | FRONT_RIGHT_OF_CENTER;
+	static const AVChannelLayout LAYOUT_OCTAGONAL = LAYOUT_5POINT0 | BACK_LEFT | BACK_CENTER | BACK_RIGHT;
+	static const AVChannelLayout LAYOUT_STEREO_DOWNMIX = STEREO_LEFT | STEREO_RIGHT;
 protected:
 	/// Layout Value
 	UInt64			m_nValue;
@@ -1817,23 +1817,23 @@ public enum class Profile : int
 	MPEG2_MAIN = 4,
 	MPEG2_SIMPLE = 5,
 
-	H264_CONSTRAINED = (1 << 9),  // 8+1, constraint_set1_flag
-	H264_INTRA = (1 << 11), // 8+3, constraint_set3_flag
+	H264_CONSTRAINED = 1 << 9,  // 8+1, constraint_set1_flag
+	H264_INTRA = 1 << 11, // 8+3, constraint_set3_flag
 
 	H264_BASELINE = 66,
-	H264_CONSTRAINED_BASELINE = (66 | H264_CONSTRAINED),
+	H264_CONSTRAINED_BASELINE = 66 | H264_CONSTRAINED,
 	H264_MAIN = 77,
 	H264_EXTENDED = 88,
 	H264_HIGH = 100,
 	H264_HIGH_10 = 110,
-	H264_HIGH_10_INTRA = (110 | H264_INTRA),
+	H264_HIGH_10_INTRA = 110 | H264_INTRA,
 	H264_MULTIVIEW_HIGH = 118,
 	H264_HIGH_422 = 122,
-	H264_HIGH_422_INTRA = (122 | H264_INTRA),
+	H264_HIGH_422_INTRA = 122 | H264_INTRA,
 	H264_STEREO_HIGH = 128,
 	H264_HIGH_444 = 144,
 	H264_HIGH_444_PREDICTIVE = 244,
-	H264_HIGH_444_INTRA = (244 | H264_INTRA),
+	H264_HIGH_444_INTRA = 244 | H264_INTRA,
 	H264_CAVLC_444 = 44,
 
 	VC1_SIMPLE = 0,
@@ -1941,7 +1941,7 @@ public enum class AVOptFlag
 	AUDIO_PARAM     = 8,
 	VIDEO_PARAM     = 16,
 	SUBTITLE_PARAM  = 32,
-	FILTERING_PARAM = (1<<16), ///< a generic parameter which can be set by the user for filtering
+	FILTERING_PARAM = 1<<16, ///< a generic parameter which can be set by the user for filtering
 	EXPORT          = 64,
 	READONLY        = 128,
 };
@@ -2009,12 +2009,12 @@ public enum class AV_HWACCEL_FLAG : int
 	/// It's generally a good idea to pass this flag unless you have a specific
 	/// reason not to, as hardware tends to under-report supported levels.
 	///</summary>
-	IGNORE_LEVEL = (1 << 0),
+	IGNORE_LEVEL = 1 << 0,
 	///<summary>
 	/// Hardware acceleration can output YUV pixel formats with a different chroma
 	/// sampling than 4:2:0 and/or other than 8 bits per component.
 	///</summary>
-	ALLOW_HIGH_DEPTH = (1 << 1),
+	ALLOW_HIGH_DEPTH = 1 << 1,
 	///<summary>
 	/// Hardware acceleration should still be attempted for decoding when the
 	/// codec profile does not match the reported capabilities of the hardware.
@@ -2027,7 +2027,7 @@ public enum class AV_HWACCEL_FLAG : int
 	///          undefined, and may include returning entirely incorrect output
 	///          while indicating success.
 	///</summary>
-	ALLOW_PROFILE_MISMATCH = (1 << 2),
+	ALLOW_PROFILE_MISMATCH = 1 << 2,
 };
 //////////////////////////////////////////////////////
 // AV_HWACCEL_CODEC_CAP_*
@@ -2074,14 +2074,14 @@ public enum class AV_CPU_FLAG : UInt32
 	ALTIVEC      = 0x0001, ///< standard
 	VSX          = 0x0002, ///< ISA 2.06
 	POWER8       = 0x0004, ///< ISA 2.07
-	ARMV5TE      = (1 << 0),
-	ARMV6        = (1 << 1),
-	ARMV6T2      = (1 << 2),
-	VFP          = (1 << 3),
-	VFPV3        = (1 << 4),
-	NEON         = (1 << 5),
-	ARMV8        = (1 << 6),
-	SETEND       = (1 <<16),
+	ARMV5TE      = 1 << 0,
+	ARMV6        = 1 << 1,
+	ARMV6T2      = 1 << 2,
+	VFP          = 1 << 3,
+	VFPV3        = 1 << 4,
+	NEON         = 1 << 5,
+	ARMV8        = 1 << 6,
+	SETEND       = 1 <<16,
 };
 //////////////////////////////////////////////////////
 // AVLogLevel
@@ -2256,7 +2256,7 @@ public enum class AVStereo3DFlags
 {
 	None = 0,
 	// Inverted views, Right/Bottom represents the left view.
-	Invert  = (1 << 0),
+	Invert  = 1 << 0,
 };
 //////////////////////////////////////////////////////
 public enum class AVOptSerializeFlags : int
@@ -2886,7 +2886,7 @@ internal:
 	template <class T>
 	static T^ _CreateChildObject(void * p,AVBase^ _parent) {  
 		if (p == nullptr) return nullptr; 
-		T^ o = (_parent != nullptr ? (T^)_parent->GetObject((IntPtr)p) : nullptr); 
+		T^ o = _parent != nullptr ? (T^)_parent->GetObject((IntPtr)p) : nullptr; 
 		if (o == nullptr) o = gcnew T(p,_parent); return o; 
 	}
 	template <class T>
@@ -2943,12 +2943,12 @@ protected:
 	void * GetValue(int index)
 	{
 		if (m_bValidate) ValidateIndex(index);
-		return (((LPBYTE)m_pPointer) + m_nItemSize * index);
+		return (LPBYTE)m_pPointer + m_nItemSize * index;
 	}
 	void SetValue(int index,void * value)
 	{
 		if (m_bValidate) ValidateIndex(index);
-		memcpy(((LPBYTE)m_pPointer) + m_nItemSize * index,value,m_nItemSize);
+		memcpy((LPBYTE)m_pPointer + m_nItemSize * index,value,m_nItemSize);
 	}
 public:
 	property int Count { int get() { return m_nCount; } }
@@ -2967,7 +2967,7 @@ public:
 	~AVEnumerator() {}
 public:
 	// IEnumerator
-	virtual bool MoveNext() { m_nIndex++; return (m_nIndex >= 0 && m_nIndex < m_pArray->Count); }
+	virtual bool MoveNext() { m_nIndex++; return m_nIndex >= 0 && m_nIndex < m_pArray->Count; }
 	virtual property T Current { T get() { if (m_nIndex == -1) { MoveNext(); } return m_pArray[m_nIndex]; } }
 	virtual void Reset() { m_nIndex = -1; }
 	virtual property Object^ CurrentObject { virtual Object^ get () sealed = IEnumerator::Current::get { return (Object^)Current::get(); } }
@@ -3035,7 +3035,7 @@ public:
 	{ 
 		IntPtr get(int index)
 		{
-			void ** p = (void **)GetValue(index);
+			auto p = (void **)GetValue(index);
 			return (IntPtr)*p;
 		}
 		void set(int index,IntPtr value)
@@ -3047,7 +3047,7 @@ public:
 public:
 	array<IntPtr>^ ToArray()
 	{
-		List<IntPtr>^ _list = gcnew List<IntPtr>();
+		auto _list = gcnew List<IntPtr>();
 		for (int i = 0; i < m_nCount; i++)
 		{
 			_list->Add(this[i]);
@@ -3134,7 +3134,7 @@ public:
 	{ 
 		RGB^ get(int index)
 		{
-			void * p = (void *)GetValue(index);
+			auto p = GetValue(index);
 			return gcnew RGB(p);
 		}
 		void set(int index,RGB^ value)
@@ -3146,7 +3146,7 @@ public:
 public:
 	array<RGB^>^ ToArray()
 	{
-		List<RGB^>^ _list = gcnew List<RGB^>();
+		auto _list = gcnew List<RGB^>();
 		for (int i = 0; i < m_nCount; i++)
 		{
 			_list->Add(this[i]);
@@ -3194,7 +3194,7 @@ public:
 	{ 
 		RGBA^ get(int index)
 		{
-			void * p = (void *)GetValue(index);
+			auto p = GetValue(index);
 			return gcnew RGBA(p);
 		}
 		void set(int index,RGBA^ value)
@@ -3206,7 +3206,7 @@ public:
 public:
 	array<RGBA^>^ ToArray()
 	{
-		List<RGBA^>^ _list = gcnew List<RGBA^>();
+		auto _list = gcnew List<RGBA^>();
 		for (int i = 0; i < m_nCount; i++)
 		{
 			_list->Add(this[i]);
@@ -3252,7 +3252,7 @@ public:
 	{ 
 		AYUV^ get(int index)
 		{
-			void * p = (void *)GetValue(index);
+			auto p = GetValue(index);
 			return gcnew AYUV(p);
 		}
 		void set(int index,AYUV^ value)
@@ -3264,7 +3264,7 @@ public:
 public:
 	array<AYUV^>^ ToArray()
 	{
-		List<AYUV^>^ _list = gcnew List<AYUV^>();
+		auto _list = gcnew List<AYUV^>();
 		for (int i = 0; i < m_nCount; i++)
 		{
 			_list->Add(this[i]);
@@ -3310,7 +3310,7 @@ public:
 	{ 
 		YUY2^ get(int index)
 		{
-			void * p = (void *)GetValue(index);
+			auto p = GetValue(index);
 			return gcnew YUY2(p);
 		}
 		void set(int index,YUY2^ value)
@@ -3322,7 +3322,7 @@ public:
 public:
 	array<YUY2^>^ ToArray()
 	{
-		List<YUY2^>^ _list = gcnew List<YUY2^>();
+		auto _list = gcnew List<YUY2^>();
 		for (int i = 0; i < m_nCount; i++)
 		{
 			_list->Add(this[i]);
@@ -3368,7 +3368,7 @@ public:
 	{ 
 		UYVY^ get(int index)
 		{
-			void * p = (void *)GetValue(index);
+			auto p = GetValue(index);
 			return gcnew UYVY(p);
 		}
 		void set(int index,UYVY^ value)
@@ -3380,7 +3380,7 @@ public:
 public:
 	array<UYVY^>^ ToArray()
 	{
-		List<UYVY^>^ _list = gcnew List<UYVY^>();
+		auto _list = gcnew List<UYVY^>();
 		for (int i = 0; i < m_nCount; i++)
 		{
 			_list->Add(this[i]);
@@ -3516,19 +3516,19 @@ public:
 	{ 
 		AVMemPtr^ get(int index)
 		{
-			void ** p = (void **)GetValue(index);
+			auto p = (void **)GetValue(index);
 			return gcnew AVMemPtr((IntPtr)*p,m_pGetSize,m_pOpaque);
 		}
 		void set(int index,AVMemPtr^ value)
 		{
-			const void * p = (const void *)value->m_pPointer;
+			auto p = (const void *)value->m_pPointer;
 			SetValue(index,&p);
 		}
 	}
 public:
 	array<AVMemPtr^>^ ToArray()
 	{
-		List<AVMemPtr^>^ _list = gcnew List<AVMemPtr^>();
+		auto _list = gcnew List<AVMemPtr^>();
 		for (int i = 0; i < m_nCount; i++)
 		{
 			_list->Add(this[i]);
@@ -3537,7 +3537,7 @@ public:
 	}
 	array<IntPtr>^ ToPtrArray()
 	{
-		List<IntPtr>^ _list = gcnew List<IntPtr>();
+		auto _list = gcnew List<IntPtr>();
 		for (int i = 0; i < m_nCount; i++)
 		{
 			_list->Add(this[i]);
@@ -4845,10 +4845,10 @@ public:
 			~AVCollectionEnumerator(){}
 		public:
 			// IEnumerator
-			virtual bool MoveNext() { m_nIndex++; return (m_nIndex >= 0 && m_nIndex < m_pCollection->m_pDictionary->Count); }
-			virtual property String^ Current { String^ get () { if (m_nIndex == -1) MoveNext(); return (m_nIndex >= 0 && m_nIndex < m_pCollection->m_pDictionary->Count) ? m_pCollection->GetItem(m_nIndex) : nullptr; } }
+			virtual bool MoveNext() { m_nIndex++; return m_nIndex >= 0 && m_nIndex < m_pCollection->m_pDictionary->Count; }
+			virtual property String^ Current { String^ get () { if (m_nIndex == -1) MoveNext(); return m_nIndex >= 0 && m_nIndex < m_pCollection->m_pDictionary->Count ? m_pCollection->GetItem(m_nIndex) : nullptr; } }
 			virtual void Reset() { m_nIndex = -1; }
-			virtual property Object^ CurrentObject { virtual Object^ get () sealed = IEnumerator::Current::get { return (Object^)Current::get(); } }
+			virtual property Object^ CurrentObject { virtual Object^ get () sealed = IEnumerator::Current::get { return Current::get(); } }
 		};
 	protected:
 		AVDictionary^ m_pDictionary;
@@ -4935,7 +4935,7 @@ public:
 	 //Requires 256color terminal support. Uses outside debugging is not
 	 //recommended.
 	 //
-	static AVLogLevel LOG_C(int x) { return (AVLogLevel)((x) << 8); } 
+	static AVLogLevel LOG_C(int x) { return (AVLogLevel)(x << 8); } 
 
 	 // Send the specified message to the log if the level is less than or equal
 	 // to the current av_log_level. By default, all logging messages are sent to

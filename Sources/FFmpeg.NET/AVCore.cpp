@@ -49,11 +49,10 @@ String^ FFmpeg::AVColorSpace::ToString()
 
 FFmpeg::AVColorSpace FFmpeg::AVColorSpace::get_colorspace(String^ name)
 {
-	char * szName = nullptr;
-	szName = (char*)AVBase::AllocString(name).ToPointer();
+	auto szName = (char*)AVBase::AllocString(name).ToPointer();
 	try
 	{
-		return (AVColorSpace)av_color_space_from_name(szName);
+		return av_color_space_from_name(szName);
 	}
 	finally
 	{
@@ -119,17 +118,17 @@ String^ FFmpeg::AVPixelFormat::ToString()
 }
 FFmpeg::AVPixelFormat FFmpeg::AVPixelFormat::swap_endianness()
 {
-	return (AVPixelFormat)av_pix_fmt_swap_endianness((::AVPixelFormat)m_nValue);
+	return av_pix_fmt_swap_endianness((::AVPixelFormat)m_nValue);
 }
 FFmpeg::FFLoss FFmpeg::AVPixelFormat::get_pix_fmt_loss(AVPixelFormat dst_pix_fmt,AVPixelFormat src_pix_fmt,bool has_alpha)
 {
-	return (FFLoss)av_get_pix_fmt_loss((::AVPixelFormat)dst_pix_fmt,(::AVPixelFormat)src_pix_fmt,has_alpha ? 1 : 0);
+	return (FFLoss)av_get_pix_fmt_loss(dst_pix_fmt,src_pix_fmt,has_alpha ? 1 : 0);
 }
 
 FFmpeg::AVPixelFormat FFmpeg::AVPixelFormat::find_best_pix_fmt_of_list(array<AVPixelFormat>^ pix_fmt_list,AVPixelFormat src_pix_fmt,bool has_alpha, FFLoss % loss_ptr)
 {
 	int loss = (int)loss_ptr;
-	::AVPixelFormat * list = (::AVPixelFormat *)av_malloc(sizeof(::AVPixelFormat) * ((pix_fmt_list != nullptr ? pix_fmt_list->Length : 0) + 1));
+	auto list = (::AVPixelFormat *)av_malloc(sizeof(::AVPixelFormat) * ((pix_fmt_list != nullptr ? pix_fmt_list->Length : 0) + 1));
 	try
 	{
 		int index = 0;
@@ -138,7 +137,7 @@ FFmpeg::AVPixelFormat FFmpeg::AVPixelFormat::find_best_pix_fmt_of_list(array<AVP
 			while (index < pix_fmt_list->Length) { list[index] = (::AVPixelFormat)pix_fmt_list[index++]; }
 		}
 		list[index] = AV_PIX_FMT_NONE;
-		return (AVPixelFormat)avcodec_find_best_pix_fmt_of_list(list,(::AVPixelFormat)src_pix_fmt,has_alpha ? 1 : 0,&loss);
+		return avcodec_find_best_pix_fmt_of_list(list,src_pix_fmt,has_alpha ? 1 : 0,&loss);
 	}
 	finally
 	{
@@ -152,7 +151,7 @@ FFmpeg::AVPixelFormat FFmpeg::AVPixelFormat::find_best_pix_fmt_of_2(AVPixelForma
 	int loss = (int)loss_ptr;
 	try
 	{
-		return (AVPixelFormat)av_find_best_pix_fmt_of_2((::AVPixelFormat)dst_pix_fmt1,(::AVPixelFormat)dst_pix_fmt2,(::AVPixelFormat)src_pix_fmt,has_alpha ? 1 : 0,&loss);
+		return av_find_best_pix_fmt_of_2(dst_pix_fmt1,dst_pix_fmt2,src_pix_fmt,has_alpha ? 1 : 0,&loss);
 	}
 	finally
 	{
@@ -162,11 +161,10 @@ FFmpeg::AVPixelFormat FFmpeg::AVPixelFormat::find_best_pix_fmt_of_2(AVPixelForma
 
 FFmpeg::AVPixelFormat FFmpeg::AVPixelFormat::get_pix_fmt(String^ name)
 {
-	char * szName = nullptr;
-	szName = (char*)AVBase::AllocString(name->ToLower()).ToPointer();
+	auto szName = (char*)AVBase::AllocString(name->ToLower()).ToPointer();
 	try
 	{
-		return (AVPixelFormat)av_get_pix_fmt(szName);
+		return av_get_pix_fmt(szName);
 	}
 	finally
 	{
@@ -193,7 +191,7 @@ int FFmpeg::AVSampleFormat::bytes_per_sample::get()
 
 bool FFmpeg::AVSampleFormat::is_planar::get()
 {
-	return (1 == av_sample_fmt_is_planar((::AVSampleFormat)m_nValue));
+	return 1 == av_sample_fmt_is_planar((::AVSampleFormat)m_nValue);
 }
 //////////////////////////////////////////////////////
 String^ FFmpeg::AVSampleFormat::ToString()
@@ -204,26 +202,25 @@ String^ FFmpeg::AVSampleFormat::ToString()
 //////////////////////////////////////////////////////
 FFmpeg::AVSampleFormat FFmpeg::AVSampleFormat::get_alt_sample_fmt(bool planar)
 {
-	return (AVSampleFormat)av_get_alt_sample_fmt((::AVSampleFormat)m_nValue,planar ? 1 : 0);
+	return av_get_alt_sample_fmt((::AVSampleFormat)m_nValue,planar ? 1 : 0);
 }
 
 FFmpeg::AVSampleFormat FFmpeg::AVSampleFormat::get_packed_sample_fmt()
 {
-	return (AVSampleFormat)av_get_packed_sample_fmt((::AVSampleFormat)m_nValue);
+	return av_get_packed_sample_fmt((::AVSampleFormat)m_nValue);
 }
 
 FFmpeg::AVSampleFormat FFmpeg::AVSampleFormat::get_planar_sample_fmt()
 {
-	return (AVSampleFormat)av_get_planar_sample_fmt((::AVSampleFormat)m_nValue);
+	return av_get_planar_sample_fmt((::AVSampleFormat)m_nValue);
 }
 //////////////////////////////////////////////////////
 FFmpeg::AVSampleFormat FFmpeg::AVSampleFormat::get_sample_fmt(String^ name)
 {
-	char * szName = nullptr;
-	szName = (char*)AVBase::AllocString(name).ToPointer();
+	auto szName = (char*)AVBase::AllocString(name).ToPointer();
 	try
 	{
-		return (AVSampleFormat)av_get_sample_fmt(szName);
+		return av_get_sample_fmt(szName);
 	}
 	finally
 	{
@@ -245,16 +242,16 @@ FFmpeg::AVChannelLayout::AVChannelLayout(__int64 value)
 //////////////////////////////////////////////////////
 int FFmpeg::AVChannelLayout::channels::get()
 {
-	return av_get_channel_layout_nb_channels((uint64_t)m_nValue);
+	return av_get_channel_layout_nb_channels(m_nValue);
 }
 String^ FFmpeg::AVChannelLayout::name::get()
 {
-	auto p = av_get_channel_name((uint64_t)m_nValue);
+	auto p = av_get_channel_name(m_nValue);
 	return p != nullptr ? gcnew String(p) : description::get();
 }
 String^ FFmpeg::AVChannelLayout::description::get()
 {
-	auto p = av_get_channel_description((uint64_t)m_nValue);
+	auto p = av_get_channel_description(m_nValue);
 	return p != nullptr ? gcnew String(p) : ToString();
 }
 FFmpeg::AVChannelLayout FFmpeg::AVChannelLayout::default::get(int channel)
@@ -268,13 +265,12 @@ int FFmpeg::AVChannelLayout::default::get(AVChannelLayout channel)
 //////////////////////////////////////////////////////
 FFmpeg::AVChannelLayout FFmpeg::AVChannelLayout::get_channel_layout(String^ name)
 {
-	char * szName = nullptr;
 	if (!String::IsNullOrEmpty(name))
 	{
-		szName = (char*) AVBase::AllocString(name).ToPointer();
+		auto szName = (char*)AVBase::AllocString(name).ToPointer();
 		try
 		{
-			return (AVChannelLayout)av_get_channel_layout(szName);
+			return av_get_channel_layout(szName);
 		}
 		finally
 		{
@@ -291,12 +287,12 @@ FFmpeg::AVChannelLayout FFmpeg::AVChannelLayout::get_default_channel_layout(int 
 
 int FFmpeg::AVChannelLayout::get_channel_index(AVChannelLayout channel)
 {
-	return av_get_channel_layout_channel_index(m_nValue,(uint64_t)channel);
+	return av_get_channel_layout_channel_index(m_nValue,channel);
 }
 
 FFmpeg::AVChannelLayout FFmpeg::AVChannelLayout::extract_channel(int index)
 {
-	return (AVChannelLayout)av_channel_layout_extract_channel(m_nValue,index);
+	return av_channel_layout_extract_channel(m_nValue,index);
 }
 
 String^ FFmpeg::AVChannelLayout ::ToString()
@@ -317,7 +313,7 @@ bool FFmpeg::AVChannelLayout::get_standard_channel_layout(UInt32 index, [Out] AV
 	finally
 	{
 		layout = (AVChannelLayout)_layout;
-		name = (_name != nullptr ? gcnew String(_name) : nullptr);
+		name = _name != nullptr ? gcnew String(_name) : nullptr;
 	}
 }
 //////////////////////////////////////////////////////
@@ -352,8 +348,8 @@ String^ FFmpeg::AVRESULT::Text::get()
 }
 //////////////////////////////////////////////////////
 int FFmpeg::AVRESULT::CompareTo(System::Object ^obj)
-{ 
-	AVRESULT^ r = dynamic_cast<AVRESULT^>(obj); 
+{
+	auto r = dynamic_cast<AVRESULT^>(obj); 
 	if (r != nullptr)
 	{
 		return m_nValue.CompareTo(r->m_nValue);
@@ -363,7 +359,7 @@ int FFmpeg::AVRESULT::CompareTo(System::Object ^obj)
 
 System::Object ^ FFmpeg::AVRESULT::Clone()
 {
-	return (Object ^)AVRESULT(m_nValue);
+	return AVRESULT(m_nValue);
 }
 //////////////////////////////////////////////////////
 // AVBase
@@ -636,7 +632,7 @@ FFmpeg::AVBase^ FFmpeg::AVBase::GetObject(IntPtr p)
 
 bool FFmpeg::AVBase::AddObject(AVBase^ _object)
 {
-	bool bResult = false;
+	auto bResult = false;
 	ValidateObject();
 	Monitor::Enter(m_Objects);
 	try
@@ -701,7 +697,7 @@ void FFmpeg::AVBase::RemoveObject(IntPtr p)
 bool FFmpeg::AVBase::Equals(Object^ obj)
 {
 	if (Object::ReferenceEquals(this,obj)) return true;
-	AVBase^ _object = dynamic_cast<AVBase^>(obj);
+	auto _object = dynamic_cast<AVBase^>(obj);
 	if (_object != nullptr)
 	{
 		if (_object->m_pPointer == m_pPointer) return true;
@@ -725,7 +721,7 @@ void FFmpeg::AVBase::_Pointer::set(IntPtr _ptr)
 
 bool FFmpeg::AVBase::_IsValid::get()
 {
-	return (m_pPointer != nullptr);
+	return m_pPointer != nullptr;
 }
 
 bool FFmpeg::AVBase::_IsAllocated::get()
@@ -749,7 +745,7 @@ void FFmpeg::AVBase::AllocPointer(int _size)
 	m_pPointer = av_mallocz(_size);
 	m_pFree = ::av_free;
 	m_pFreep = nullptr;
-	m_bAllocated = (m_pPointer != nullptr);
+	m_bAllocated = m_pPointer != nullptr;
 }
 //////////////////////////////////////////////////////
 IntPtr FFmpeg::AVBase::GetMemory(String^ _key)
@@ -800,7 +796,7 @@ IntPtr FFmpeg::AVBase::AllocMemory(String^ _key,int _size)
 IntPtr FFmpeg::AVBase::AllocMemory(int _size)
 {
 	if (_size <= 0) throw gcnew ArgumentOutOfRangeException();
-	IntPtr _memory = (IntPtr)av_mallocz(_size);
+	auto _memory = (IntPtr)av_mallocz(_size);
 	if (_memory != IntPtr::Zero)
 	{
 		Monitor::Enter(m_AllocatedMemory);
@@ -934,13 +930,13 @@ bool FFmpeg::AVBase::IsAllocated(String^ _key)
 //////////////////////////////////////////////////////
 bool FFmpeg::AVBase::operator == (FFmpeg::AVBase^ _source,FFmpeg::AVBase^ _dest)
 {
-	if (((Object^)(_source)) != nullptr && ((Object^)(_dest)) != nullptr)
+	if ((Object^)_source != nullptr && (Object^)_dest != nullptr)
 	{
-		 return (_source->_Pointer == _dest->_Pointer);
+		 return _source->_Pointer == _dest->_Pointer;
 	}
 	else
 	{
-		return ((Object^)(_dest) == ((Object^)(_source)));
+		return (Object^)_dest == (Object^)_source;
 	}
 }
 
@@ -951,11 +947,11 @@ bool FFmpeg::AVBase::operator != (FFmpeg::AVBase^ _source,FFmpeg::AVBase^ _dest)
 
 bool FFmpeg::AVBase::operator == (AVBase^ _source, IntPtr p)
 {
-	if (((Object^)(_source)) == nullptr)
+	if ((Object^)_source == nullptr)
 	{
 		return p == IntPtr::Zero;
 	}
-	return (_source->_Pointer == p);
+	return _source->_Pointer == p;
 }
 
 bool FFmpeg::AVBase::operator != (AVBase^_source, IntPtr p)
@@ -970,7 +966,7 @@ bool FFmpeg::AVBase::TraceValues(FFmpeg::AVBase^ _object)
     int _skipped = 0;
 #ifdef _DEBUG
 	using namespace System::Reflection;
-    List<PropertyInfo^>^ fProperties = gcnew List<PropertyInfo^>();
+    auto fProperties = gcnew List<PropertyInfo^>();
     String^ _separator = "---------------------------------------";
     String^ _separator2 = "//////////////////////////////////////";
     Console::WriteLine();
@@ -1060,34 +1056,34 @@ void FFmpeg::AVColor::InitializeTables()
 
 		for (int j = 0; j < 256; j++)
 		{
-			g_RY[j]	= (int)((s_Matrices[1][0][0] * (j - 16))  * fShift);
-			g_RU[j]	= (int)((s_Matrices[1][0][1] * (j - 128)) * fShift);
-			g_RV[j] = (int)((s_Matrices[1][0][2] * (j - 128)) * fShift);
+			g_RY[j]	= (int)(s_Matrices[1][0][0] * (j - 16)  * fShift);
+			g_RU[j]	= (int)(s_Matrices[1][0][1] * (j - 128) * fShift);
+			g_RV[j] = (int)(s_Matrices[1][0][2] * (j - 128) * fShift);
 			
-			g_GY[j]	= (int)((s_Matrices[1][1][0] * (j - 16))  * fShift);
-			g_GU[j]	= (int)((s_Matrices[1][1][1] * (j - 128)) * fShift);
-			g_GV[j]	= (int)((s_Matrices[1][1][2] * (j - 128)) * fShift);
+			g_GY[j]	= (int)(s_Matrices[1][1][0] * (j - 16)  * fShift);
+			g_GU[j]	= (int)(s_Matrices[1][1][1] * (j - 128) * fShift);
+			g_GV[j]	= (int)(s_Matrices[1][1][2] * (j - 128) * fShift);
 			
-			g_BY[j]	= (int)((s_Matrices[1][2][0] * (j - 16))  * fShift);
-			g_BU[j]	= (int)((s_Matrices[1][2][1] * (j - 128)) * fShift);
-			g_BV[j]	= (int)((s_Matrices[1][2][2] * (j - 128)) * fShift);
+			g_BY[j]	= (int)(s_Matrices[1][2][0] * (j - 16)  * fShift);
+			g_BU[j]	= (int)(s_Matrices[1][2][1] * (j - 128) * fShift);
+			g_BV[j]	= (int)(s_Matrices[1][2][2] * (j - 128) * fShift);
 
-			g_YR[j] = (int)((s_Matrices[0][0][0] * j) * fShift); //16
-			g_YG[j] = (int)((s_Matrices[0][0][1] * j) * fShift);
-			g_YB[j] = (int)((s_Matrices[0][0][2] * j) * fShift);
+			g_YR[j] = (int)(s_Matrices[0][0][0] * j * fShift); //16
+			g_YG[j] = (int)(s_Matrices[0][0][1] * j * fShift);
+			g_YB[j] = (int)(s_Matrices[0][0][2] * j * fShift);
 
-			g_UR[j] = (int)((s_Matrices[0][1][0] * j) * fShift); //128
-			g_UG[j] = (int)((s_Matrices[0][1][1] * j) * fShift);
-			g_UB[j] = (int)((s_Matrices[0][1][2] * j) * fShift);
+			g_UR[j] = (int)(s_Matrices[0][1][0] * j * fShift); //128
+			g_UG[j] = (int)(s_Matrices[0][1][1] * j * fShift);
+			g_UB[j] = (int)(s_Matrices[0][1][2] * j * fShift);
 
-			g_VR[j] = (int)((s_Matrices[0][2][0] * j) * fShift); //128
-			g_VG[j] = (int)((s_Matrices[0][2][1] * j) * fShift);
-			g_VB[j] = (int)((s_Matrices[0][2][2] * j) * fShift);
+			g_VR[j] = (int)(s_Matrices[0][2][0] * j * fShift); //128
+			g_VG[j] = (int)(s_Matrices[0][2][1] * j * fShift);
+			g_VB[j] = (int)(s_Matrices[0][2][2] * j * fShift);
 		}
 
-		for (int i = 0; i < sizeof(g_bColorValue); i++)
+		for (int i = 0; i < sizeof g_bColorValue; i++)
 		{
-			g_bColorValue[i] = (uint8_t)(i < 320 ? 0x00 : (i - 320 > 255 ? 255 : i - 320));
+			g_bColorValue[i] = (uint8_t)(i < 320 ? 0x00 : i - 320 > 255 ? 255 : i - 320);
 		}
 	}
 }
@@ -1156,7 +1152,7 @@ int FFmpeg::AVColor::Size::get()
 }
 byte FFmpeg::AVColor::default::get(int idx)
 {
-	if (idx < 0 || (idx >= m_nSize && m_nSize != 0))
+	if (idx < 0 || idx >= m_nSize && m_nSize != 0)
 	{
 		throw gcnew ArgumentOutOfRangeException("Index Out Of Range");
 	}
@@ -1164,7 +1160,7 @@ byte FFmpeg::AVColor::default::get(int idx)
 }
 void FFmpeg::AVColor::default::set(int idx, byte value)
 {
-	if (idx < 0 || (idx >= m_nSize && m_nSize != 0))
+	if (idx < 0 || idx >= m_nSize && m_nSize != 0)
 	{
 		throw gcnew ArgumentOutOfRangeException("Index Out Of Range");
 	}
@@ -1190,7 +1186,7 @@ FFmpeg::AVColor::operator IntPtr(FFmpeg::AVColor^ c)
 //////////////////////////////////////////////////////
 FFmpeg::AVColor::operator byte(FFmpeg::AVColor^ c)
 {
-	if (((Object^)c) == nullptr || c->m_pPointer == nullptr) return 0;
+	if ((Object^)c == nullptr || c->m_pPointer == nullptr) return 0;
 	return c->m_pPointer[0];
 }
 FFmpeg::AVColor::operator short(FFmpeg::AVColor^ c)
@@ -1200,11 +1196,11 @@ FFmpeg::AVColor::operator short(FFmpeg::AVColor^ c)
 }
 FFmpeg::AVColor::operator int(FFmpeg::AVColor^ c)
 {
-	if (((Object^)c) == nullptr || c->m_pPointer == nullptr) return 0;
+	if ((Object^)c == nullptr || c->m_pPointer == nullptr) return 0;
 	int color = 0;
 	for (int i = c->m_nSize - 1; i >= 0; i--)
 	{
-		color = (color << 8) | (int)c->m_pPointer[i];
+		color = color << 8 | (int)c->m_pPointer[i];
 	}
 	return color;
 }
@@ -1221,9 +1217,9 @@ FFmpeg::AVColor::operator unsigned int(FFmpeg::AVColor^ c)
 //////////////////////////////////////////////////////
 bool FFmpeg::AVColor::operator == (AVColor^ a, AVColor^ b)
 {
-	if (((Object^)a) == nullptr || ((Object^)b) == nullptr)
+	if ((Object^)a == nullptr || (Object^)b == nullptr)
 	{
-		return (((Object^)a) == nullptr && ((Object^)b) == nullptr);
+		return (Object^)a == nullptr && (Object^)b == nullptr;
 	}
 	else
 	{
@@ -1235,11 +1231,11 @@ bool FFmpeg::AVColor::operator == (AVColor^ a, AVColor^ b)
 		{	
 			if (a->m_nFourCC == b->m_nFourCC)
 			{
-				return (memcmp(a->m_pPointer,b->m_pPointer,a->m_nSize) == 0);
+				return memcmp(a->m_pPointer,b->m_pPointer,a->m_nSize) == 0;
 			}
 			else
 			{
-				return (a->Color == b->Color);
+				return a->Color == b->Color;
 			}
 		}
 		else
@@ -1262,7 +1258,7 @@ void FFmpeg::AVColor::operator = (int n)
 }
 void FFmpeg::AVColor::operator = (AVColor^ c)
 {
-	if (((Object^)c) != nullptr && c->m_pPointer != nullptr && m_pPointer != nullptr)
+	if ((Object^)c != nullptr && c->m_pPointer != nullptr && m_pPointer != nullptr)
 	{
 		if (c->m_pPointer != m_pPointer)
 		{
@@ -1288,7 +1284,7 @@ void FFmpeg::AVColor::operator = (System::Drawing::Color c)
 //////////////////////////////////////////////////////
 array<byte>^ FFmpeg::AVColor::ToArray()
 {
-	array<byte>^ a = gcnew array<byte>(3);
+	auto a = gcnew array<byte>(3);
 	for (int i = 0; i < m_nSize; i++)
 	{
 		a[i] = m_pPointer[i];
@@ -1297,11 +1293,10 @@ array<byte>^ FFmpeg::AVColor::ToArray()
 }
 String^ FFmpeg::AVColor::ToString()
 {
-	String^ fcc = "";
 	String^ color = "0x";
 
 	auto _data = BitConverter::GetBytes(m_nFourCC);
-	fcc = System::Text::Encoding::Default->GetString(_data);
+	String^ fcc = System::Text::Encoding::Default->GetString(_data);
 	for (int i = 0; i < _data->Length; i++)
 	{
 		if (_data[i] <= 30 || _data[i] > 128)
@@ -1313,7 +1308,7 @@ String^ FFmpeg::AVColor::ToString()
 	auto c = this->Color;
 	for (int i = 0; i < m_nSize; i++)
 	{
-		color += String::Format("{0:X2}",(byte)m_pPointer[i]);
+		color += String::Format("{0:X2}",m_pPointer[i]);
 	}
 	if (fcc != "")
 	{
@@ -1329,7 +1324,7 @@ String^ FFmpeg::AVColor::ToString()
 System::Drawing::Color FFmpeg::RGB::Color::get()
 {
 	int color = this->operator int (this);
-	return System::Drawing::Color::FromArgb((color | (0xff << 24)));
+	return System::Drawing::Color::FromArgb(color | 0xff << 24);
 }
 void FFmpeg::RGB::Color::set(System::Drawing::Color c) 
 {
@@ -1571,7 +1566,7 @@ int FFmpeg::AVMemPtr::size::get()
 			_size = m_nSize;
 		}
 	}
-	return _size > 0 ? (_size - m_nPosition) : 0;
+	return _size > 0 ? _size - m_nPosition : 0;
 }
 byte FFmpeg::AVMemPtr::default::get(int idx)
 {
@@ -1584,7 +1579,7 @@ void FFmpeg::AVMemPtr::default::set(int idx, byte value)
 //////////////////////////////////////////////////////
 IntPtr FFmpeg::AVMemPtr::Detach()
 {
-	IntPtr p = (IntPtr)m_pPointer;
+	auto p = (IntPtr)m_pPointer;
 	m_nSize = 0;
 	m_nPosition = 0;
 	m_bAllocated = false;
@@ -1615,56 +1610,56 @@ FFmpeg::AVMemPtr::operator IntPtr(AVMemPtr^ p)
 }
 FFmpeg::AVMemPtr::operator AVMemPtr^(IntPtr p)
 {
-	return ((p == IntPtr::Zero) ? nullptr : gcnew AVMemPtr(p));
+	return p == IntPtr::Zero ? nullptr : gcnew AVMemPtr(p);
 }
 //////////////////////////////////////////////////////
 FFmpeg::AVMemPtr::operator bool(AVMemPtr^ p)
 {
-	return ((Object^)p != nullptr && p->m_pPointer != nullptr);
+	return (Object^)p != nullptr && p->m_pPointer != nullptr;
 }
 bool FFmpeg::AVMemPtr::operator !(AVMemPtr^ p)
 {
-	return ((Object^)p == nullptr || p->m_pPointer == nullptr);
+	return (Object^)p == nullptr || p->m_pPointer == nullptr;
 }
 //////////////////////////////////////////////////////
 FFmpeg::AVMemPtr::operator byte(AVMemPtr^ p)
 {
-	uint8_t * value = ((uint8_t *)p->m_pPointer) + p->m_nPosition;
+	uint8_t * value = (uint8_t *)p->m_pPointer + p->m_nPosition;
 	return *value;
 }
 FFmpeg::AVMemPtr::operator short(AVMemPtr^ p)
 {
-	int16_t * value = (int16_t *)(((uint8_t *)p->m_pPointer) + p->m_nPosition);
+	auto value = (int16_t *)((uint8_t *)p->m_pPointer + p->m_nPosition);
 	return *value;
 }
 FFmpeg::AVMemPtr::operator int(AVMemPtr^ p)
 {
-	int32_t * value = (int32_t *)(((uint8_t *)p->m_pPointer) + p->m_nPosition);
+	auto value = (int32_t *)((uint8_t *)p->m_pPointer + p->m_nPosition);
 	return *value;
 }
 FFmpeg::AVMemPtr::operator __int64(AVMemPtr^ p)
 {
-	int64_t * value = (int64_t *)(((uint8_t *)p->m_pPointer) + p->m_nPosition);
+	auto value = (int64_t *)((uint8_t *)p->m_pPointer + p->m_nPosition);
 	return *value;
 }
 FFmpeg::AVMemPtr::operator float(AVMemPtr^ p)
 {
-	float * value = (float *)(((uint8_t *)p->m_pPointer) + p->m_nPosition);
+	auto value = (float *)((uint8_t *)p->m_pPointer + p->m_nPosition);
 	return *value;
 }
 FFmpeg::AVMemPtr::operator double(AVMemPtr^ p)
 {
-	double * value = (double *)(((uint8_t *)p->m_pPointer) + p->m_nPosition);
+	auto value = (double *)((uint8_t *)p->m_pPointer + p->m_nPosition);
 	return *value;
 }
 FFmpeg::AVMemPtr::operator unsigned short(AVMemPtr^ p)
 {
-	unsigned short * value = (unsigned short *)(((uint8_t *)p->m_pPointer) + p->m_nPosition);
+	auto value = (unsigned short *)((uint8_t *)p->m_pPointer + p->m_nPosition);
 	return *value;
 }
 FFmpeg::AVMemPtr::operator unsigned int(AVMemPtr^ p)
 {
-	unsigned int * value = (unsigned int *)(((uint8_t *)p->m_pPointer) + p->m_nPosition);
+	auto value = (unsigned int *)((uint8_t *)p->m_pPointer + p->m_nPosition);
 	return *value;
 }
 //////////////////////////////////////////////////////
@@ -1672,9 +1667,9 @@ bool FFmpeg::AVMemPtr::operator == (AVMemPtr^ a,AVMemPtr^ b)
 {
 	if ((Object^)a != nullptr && (Object^)b != nullptr)
 	{
-		return (a->m_pPointer == b->m_pPointer) && (a->m_nPosition == b->m_nPosition);
+		return a->m_pPointer == b->m_pPointer && a->m_nPosition == b->m_nPosition;
 	}
-	return ((Object^)a) == ((Object^)b);
+	return (Object^)a == (Object^)b;
 }
 bool FFmpeg::AVMemPtr::operator != (AVMemPtr^ a,AVMemPtr^ b)
 {
@@ -1684,7 +1679,7 @@ bool FFmpeg::AVMemPtr::operator == (AVMemPtr^ a,IntPtr p)
 {
 	if ((Object^)a != nullptr)
 	{
-		return ((void*)((uint8_t*)a->m_pPointer + a->m_nPosition) == p.ToPointer());
+		return (void*)((uint8_t*)a->m_pPointer + a->m_nPosition) == p.ToPointer();
 	}
 	return p == IntPtr::Zero;
 }
@@ -1694,7 +1689,7 @@ bool FFmpeg::AVMemPtr::operator != (AVMemPtr^a,IntPtr p )
 }
 bool FFmpeg::AVMemPtr::operator == (AVMemPtr^ a,int i)
 {
-	return (a == (IntPtr)i);
+	return a == (IntPtr)i;
 }
 bool FFmpeg::AVMemPtr::operator != (AVMemPtr^ a ,int i)
 {
@@ -1702,7 +1697,7 @@ bool FFmpeg::AVMemPtr::operator != (AVMemPtr^ a ,int i)
 }
 bool FFmpeg::AVMemPtr::operator == (AVMemPtr^ a,Int64 ll)
 {
-	return (a == (IntPtr)ll);
+	return a == (IntPtr)ll;
 }
 bool FFmpeg::AVMemPtr::operator != (AVMemPtr^ a,Int64 ll)
 {
@@ -1770,91 +1765,91 @@ FFmpeg::AVMemPtr^ FFmpeg::AVMemPtr::operator -- (int n)
 FFmpeg::AVArray<byte>^  FFmpeg::AVMemPtr::bytes::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<byte>((IntPtr)p,count, false);
 }
 FFmpeg::AVArray<short>^ FFmpeg::AVMemPtr::shorts::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<short>((IntPtr)p,count / sizeof(short), false);
 }
 FFmpeg::AVArray<int>^ FFmpeg::AVMemPtr::integers::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<int>((IntPtr)p,count / sizeof(int), false);
 }
 FFmpeg::AVArray<float>^ FFmpeg::AVMemPtr::floats::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<float>((IntPtr)p,count / sizeof(float), false);
 }
 FFmpeg::AVArray<double>^ FFmpeg::AVMemPtr::doubles::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<double>((IntPtr)p,count / sizeof(double), false);
 }
 FFmpeg::AVArray<IntPtr>^ FFmpeg::AVMemPtr::pointers::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<IntPtr>((IntPtr)p,count / sizeof(void*));
 }
 FFmpeg::AVArray<unsigned int>^	FFmpeg::AVMemPtr::uints::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<unsigned int>((IntPtr)p,count / sizeof(unsigned int), false);
 }
 FFmpeg::AVArray<unsigned short>^ FFmpeg::AVMemPtr::ushorts::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<unsigned short>((IntPtr)p,count / sizeof(unsigned short), false);
 }
 FFmpeg::AVArray<FFmpeg::RGB^>^   FFmpeg::AVMemPtr::rgb::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<RGB^>((IntPtr)p,count / 3, false);
 }
 FFmpeg::AVArray<FFmpeg::RGBA^>^  FFmpeg::AVMemPtr::rgba::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<RGBA^>((IntPtr)p,count / 4, false);
 }
 FFmpeg::AVArray<FFmpeg::AYUV^>^  FFmpeg::AVMemPtr::ayuv::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<AYUV^>((IntPtr)p,count / 4, false);
 }
 FFmpeg::AVArray<FFmpeg::YUY2^>^  FFmpeg::AVMemPtr::yuy2::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<YUY2^>((IntPtr)p,count / 4, false);
 }
 FFmpeg::AVArray<FFmpeg::UYVY^>^  FFmpeg::AVMemPtr::uyvy::get()
 {
 	if (m_pPointer == nullptr) return nullptr;
-	uint8_t * p = ((uint8_t *)m_pPointer) + m_nPosition;
+	uint8_t * p = (uint8_t *)m_pPointer + m_nPosition;
 	int count = size;
 	return gcnew AVArray<UYVY^>((IntPtr)p,count > 4 ? count / 4 : 1, false);
 }
@@ -1882,7 +1877,7 @@ bool FFmpeg::AVMemPtr::Dump(String^ sFileName,bool bAppend)
 	IntPtr p = this;
 	if (_size > 0 && p != IntPtr::Zero)
 	{
-		wchar_t * path = (wchar_t *)AVBase::AllocString(sFileName, true).ToPointer();
+		auto path = (wchar_t *)AVBase::AllocString(sFileName, true).ToPointer();
 		try
 		{
 			HANDLE hFile = CreateFileW(path, FILE_GENERIC_WRITE, FILE_SHARE_READ, NULL, bAppend ? OPEN_ALWAYS : CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -1890,7 +1885,7 @@ bool FFmpeg::AVMemPtr::Dump(String^ sFileName,bool bAppend)
 			{
 				SetFilePointer(hFile, 0, NULL, FILE_END);
 				DWORD dwResult;
-				_result = (WriteFile(hFile, p.ToPointer(), (DWORD)_size, &dwResult, NULL) == TRUE);
+				_result = WriteFile(hFile, p.ToPointer(), (DWORD)_size, &dwResult, NULL) == TRUE;
 				CloseHandle(hFile);
 			}
 		}
@@ -1942,17 +1937,16 @@ String^ FFmpeg::LibAVUtil::License::get()
 //////////////////////////////////////////////////////
 String^ FFmpeg::AVSampleFmt::get_sample_fmt_name(AVSampleFormat sample_fmt)
 {
-	auto p = av_get_sample_fmt_name((::AVSampleFormat)sample_fmt);
+	auto p = av_get_sample_fmt_name(sample_fmt);
 	return p != nullptr ? gcnew String(p) : nullptr;
 }
 
 FFmpeg::AVSampleFormat FFmpeg::AVSampleFmt::get_sample_fmt(String^ name)
 {
-	char * szName = nullptr;
-	szName = (char*)AVBase::AllocString(name).ToPointer();
+	auto szName = (char*)AVBase::AllocString(name).ToPointer();
 	try
 	{
-		return (AVSampleFormat)av_get_sample_fmt(szName);
+		return av_get_sample_fmt(szName);
 	}
 	finally
 	{
@@ -1962,40 +1956,39 @@ FFmpeg::AVSampleFormat FFmpeg::AVSampleFmt::get_sample_fmt(String^ name)
 
 FFmpeg::AVSampleFormat FFmpeg::AVSampleFmt::get_alt_sample_fmt(AVSampleFormat sample_fmt, bool planar)
 {
-	return (AVSampleFormat)av_get_alt_sample_fmt((::AVSampleFormat)sample_fmt,planar ? 1 : 0);
+	return av_get_alt_sample_fmt(sample_fmt,planar ? 1 : 0);
 }
 
 FFmpeg::AVSampleFormat FFmpeg::AVSampleFmt::get_packed_sample_fmt(AVSampleFormat sample_fmt)
 {
-	return (AVSampleFormat)av_get_packed_sample_fmt((::AVSampleFormat)sample_fmt);
+	return av_get_packed_sample_fmt(sample_fmt);
 }
 
 FFmpeg::AVSampleFormat FFmpeg::AVSampleFmt::get_planar_sample_fmt(AVSampleFormat sample_fmt)
 {
-	return (AVSampleFormat)av_get_planar_sample_fmt((::AVSampleFormat)sample_fmt);
+	return av_get_planar_sample_fmt(sample_fmt);
 }
 
 int FFmpeg::AVSampleFmt::get_bytes_per_sample(AVSampleFormat sample_fmt)
 {
-	return av_get_bytes_per_sample((::AVSampleFormat)sample_fmt);
+	return av_get_bytes_per_sample(sample_fmt);
 }
 
 bool FFmpeg::AVSampleFmt::sample_fmt_is_planar(AVSampleFormat sample_fmt)
 {
-	return (1 == av_sample_fmt_is_planar((::AVSampleFormat)sample_fmt));
+	return 1 == av_sample_fmt_is_planar(sample_fmt);
 }
 //////////////////////////////////////////////////////
 // AVChannels
 //////////////////////////////////////////////////////
 FFmpeg::AVChannelLayout FFmpeg::AVChannels::get_channel_layout(String^ name)
 {
-	char * szName = nullptr;
 	if (!String::IsNullOrEmpty(name))
 	{
-		szName = (char*) AVBase::AllocString(name).ToPointer();
+		auto szName = (char*)AVBase::AllocString(name).ToPointer();
 		try
 		{
-			return (AVChannelLayout)av_get_channel_layout(szName);
+			return av_get_channel_layout(szName);
 		}
 		finally
 		{
@@ -2007,7 +2000,7 @@ FFmpeg::AVChannelLayout FFmpeg::AVChannels::get_channel_layout(String^ name)
 
 int FFmpeg::AVChannels::get_nb_channels(AVChannelLayout channel_layout)
 {
-	return av_get_channel_layout_nb_channels((uint64_t)channel_layout);
+	return av_get_channel_layout_nb_channels(channel_layout);
 }
 
 FFmpeg::AVChannelLayout FFmpeg::AVChannels::get_default_channel_layout(int nb_channels)
@@ -2017,17 +2010,17 @@ FFmpeg::AVChannelLayout FFmpeg::AVChannels::get_default_channel_layout(int nb_ch
 
 int FFmpeg::AVChannels::get_channel_index(AVChannelLayout channel_layout,AVChannelLayout channel)
 {
-	return av_get_channel_layout_channel_index((uint64_t)channel_layout,(uint64_t)channel);
+	return av_get_channel_layout_channel_index(channel_layout,channel);
 }
 
 FFmpeg::AVChannelLayout FFmpeg::AVChannels::extract_channel(AVChannelLayout channel_layout, int index)
 {
-	return (AVChannelLayout)av_channel_layout_extract_channel((uint64_t)channel_layout,index);
+	return av_channel_layout_extract_channel(channel_layout,index);
 }
 
 String^ FFmpeg::AVChannels::get_channel_name(AVChannelLayout channel)
 {
-	auto p = av_get_channel_name((uint64_t)channel);
+	auto p = av_get_channel_name(channel);
 	return p != nullptr ? gcnew String(p) : nullptr;
 }
 String^ FFmpeg::AVChannels::get_channel_layout_string(AVChannelLayout layout)
@@ -2038,13 +2031,13 @@ String^ FFmpeg::AVChannels::get_channel_layout_string(AVChannelLayout layout)
 String^ FFmpeg::AVChannels::get_channel_layout_string(int nb_channels, AVChannelLayout layout)
 {
 	char buf[300] = {0};
-	av_get_channel_layout_string(buf,_countof(buf),nb_channels,(uint64_t)layout);
+	av_get_channel_layout_string(buf,_countof(buf),nb_channels,layout);
 	return gcnew String(buf);
 }
 
 String^ FFmpeg::AVChannels::get_channel_description(AVChannelLayout channel)
 {
-	auto p = av_get_channel_name((uint64_t)channel);
+	auto p = av_get_channel_name(channel);
 	return p != nullptr ? gcnew String(p) : nullptr;
 }
 
@@ -2059,7 +2052,7 @@ bool FFmpeg::AVChannels::get_standard_channel_layout(UInt32 index, AVChannelLayo
 	finally
 	{
 		layout = (AVChannelLayout)_layout;
-		name = (_name != nullptr ? gcnew String(_name) : nullptr);
+		name = _name != nullptr ? gcnew String(_name) : nullptr;
 	}
 }
 //////////////////////////////////////////////////////
@@ -2084,7 +2077,7 @@ int FFmpeg::AVSamples::get_buffer_size(int % linesize, int nb_channels, int nb_s
 	int _linesize = 0;
 	try
 	{
-		return av_samples_get_buffer_size(&_linesize,nb_channels, nb_samples,(::AVSampleFormat)sample_fmt,align ? 1 : 0);
+		return av_samples_get_buffer_size(&_linesize,nb_channels, nb_samples,sample_fmt,align ? 1 : 0);
 	}
 	finally
 	{
@@ -2137,7 +2130,7 @@ int FFmpeg::AVSamples::fill_arrays(array<IntPtr>^ % audio_data, int % linesize,I
 	uint8_t *_data[AV_NUM_DATA_POINTERS] = { 0 };
 	try
 	{
-		return av_samples_fill_arrays(_data,(int*)&_linesize,(uint8_t *)buf.ToPointer(),nb_channels, nb_samples,(::AVSampleFormat)sample_fmt,align ? 1 : 0);
+		return av_samples_fill_arrays(_data,&_linesize,(uint8_t *)buf.ToPointer(),nb_channels, nb_samples,sample_fmt,align ? 1 : 0);
 	}
 	finally
 	{
@@ -2153,7 +2146,7 @@ int FFmpeg::AVSamples::fill_arrays(AVArray<IntPtr>^ audio_data, int % linesize,I
 	uint8_t *_data[AV_NUM_DATA_POINTERS] = { 0 };
 	try
 	{
-		return av_samples_fill_arrays(_data,&_linesize,(uint8_t *)buf.ToPointer(),nb_channels, nb_samples,(::AVSampleFormat)sample_fmt,align ? 1 : 0);
+		return av_samples_fill_arrays(_data,&_linesize,(uint8_t *)buf.ToPointer(),nb_channels, nb_samples,sample_fmt,align ? 1 : 0);
 	}
 	finally
 	{
@@ -2179,7 +2172,7 @@ int FFmpeg::AVSamples::fill_arrays(AVPicture^ _frame,IntPtr buf,
 	uint8_t *_data[AV_NUM_DATA_POINTERS] = { 0 };
 	try
 	{
-		return av_samples_fill_arrays(_data,(int*)&_linesize,(uint8_t *)buf.ToPointer(),nb_channels, nb_samples,(::AVSampleFormat)sample_fmt,align ? 1 : 0);
+		return av_samples_fill_arrays(_data,&_linesize,(uint8_t *)buf.ToPointer(),nb_channels, nb_samples,sample_fmt,align ? 1 : 0);
 	}
 	finally
 	{
@@ -2189,7 +2182,7 @@ int FFmpeg::AVSamples::fill_arrays(AVPicture^ _frame,IntPtr buf,
 
 int FFmpeg::AVSamples::fill_arrays(AVFrame^ _frame,IntPtr buf,int nb_samples,bool align)
 {
-	return fill_arrays(_frame, buf, _frame->channels, nb_samples, (AVSampleFormat)_frame->format, align);
+	return fill_arrays(_frame, buf, _frame->channels, nb_samples, _frame->format, align);
 }
 
 int FFmpeg::AVSamples::copy(array<IntPtr>^ dst, array<IntPtr>^ src, int dst_offset,
@@ -2199,7 +2192,7 @@ int FFmpeg::AVSamples::copy(array<IntPtr>^ dst, array<IntPtr>^ src, int dst_offs
 	uint8_t *_dst[AV_NUM_DATA_POINTERS] = { 0 };
 	uint8_t *_src[AV_NUM_DATA_POINTERS] = { 0 };
 	for (int i = 0; i < dst->Length && i < AV_NUM_DATA_POINTERS; i++) { _dst[i] = (uint8_t *)dst[i].ToPointer(); _src[i] = (uint8_t *)src[i].ToPointer(); } 
-	return av_samples_copy(_dst,_src,dst_offset,src_offset, nb_samples,nb_channels,(::AVSampleFormat)sample_fmt);
+	return av_samples_copy(_dst,_src,dst_offset,src_offset, nb_samples,nb_channels,sample_fmt);
 }
 
 int FFmpeg::AVSamples::copy(AVArray<IntPtr>^ dst, AVArray<IntPtr>^ src, int dst_offset,
@@ -2213,22 +2206,22 @@ int FFmpeg::AVSamples::copy(AVPicture^ dst, AVPicture^ src, int dst_offset,
                     int src_offset, int nb_samples, int nb_channels,
                     AVSampleFormat sample_fmt)
 {
-	uint8_t ** _dst = (uint8_t **)dst->data->_Pointer.ToPointer();
-	uint8_t **_src = (uint8_t **)src->data->_Pointer.ToPointer();
-	return av_samples_copy(_dst,_src,dst_offset,src_offset,nb_samples,nb_channels,(::AVSampleFormat)sample_fmt);
+	auto _dst = (uint8_t **)dst->data->_Pointer.ToPointer();
+	auto _src = (uint8_t **)src->data->_Pointer.ToPointer();
+	return av_samples_copy(_dst,_src,dst_offset,src_offset,nb_samples,nb_channels,sample_fmt);
 }
 
 int FFmpeg::AVSamples::copy(AVPicture^ dst, AVFrame^ src, int dst_offset,
                     int src_offset, int nb_samples)
 {
-	uint8_t ** _dst = (uint8_t **)dst->data->_Pointer.ToPointer();
-	uint8_t **_src = (uint8_t **)src->data->_Pointer.ToPointer();
+	auto _dst = (uint8_t **)dst->data->_Pointer.ToPointer();
+	auto _src = (uint8_t **)src->data->_Pointer.ToPointer();
 	return av_samples_copy(_dst,_src,dst_offset,src_offset,nb_samples,src->channels,(::AVSampleFormat)src->format);
 }
 int FFmpeg::AVSamples::copy(array<IntPtr>^ dst, AVFrame^ src, int dst_offset,
 	int src_offset, int nb_samples)
 {
-	uint8_t **_src = (uint8_t **)src->data->_Pointer.ToPointer();
+	auto _src = (uint8_t **)src->data->_Pointer.ToPointer();
 	uint8_t *_dst[AV_NUM_DATA_POINTERS] = { 0 };
 	for (int i = 0; i < dst->Length && i < AV_NUM_DATA_POINTERS; i++) { _dst[i] = (uint8_t *)dst[i].ToPointer(); }
 	return av_samples_copy(_dst,_src,dst_offset,src_offset,nb_samples,src->channels,(::AVSampleFormat)src->format);
@@ -2237,7 +2230,7 @@ int FFmpeg::AVSamples::copy(AVPicture^ dst, array<IntPtr>^ src, int dst_offset,
 	int src_offset, int nb_samples, int nb_channels,
 	AVSampleFormat sample_fmt)
 {
-	uint8_t ** _dst = (uint8_t **)dst->data->_Pointer.ToPointer();
+	auto _dst = (uint8_t **)dst->data->_Pointer.ToPointer();
 	uint8_t *_src[AV_NUM_DATA_POINTERS] = { 0 };
 	for (int i = 0; i < src->Length && i < AV_NUM_DATA_POINTERS; i++) { _src[i] = (uint8_t *)src[i].ToPointer(); }
 	return av_samples_copy(_dst,_src,dst_offset,src_offset, nb_samples,nb_channels,sample_fmt);
@@ -2251,7 +2244,7 @@ int FFmpeg::AVSamples::alloc(array<IntPtr>^ % audio_data, int % linesize,
 	uint8_t *_data[AV_NUM_DATA_POINTERS] = { 0 };
 	try
 	{
-		return av_samples_alloc(_data,(int*)&_linesize,nb_channels, nb_samples,(::AVSampleFormat)sample_fmt,align ? 1 : 0);
+		return av_samples_alloc(_data,&_linesize,nb_channels, nb_samples,sample_fmt,align ? 1 : 0);
 	}
 	finally
 	{
@@ -2267,7 +2260,7 @@ int FFmpeg::AVSamples::alloc(AVArray<IntPtr>^ audio_data, int % linesize,
 	uint8_t *_data[AV_NUM_DATA_POINTERS] = { 0 };
 	try
 	{
-		return av_samples_alloc(_data,(int*)&_linesize,nb_channels, nb_samples,(::AVSampleFormat)sample_fmt,align ? 1 : 0);
+		return av_samples_alloc(_data,&_linesize,nb_channels, nb_samples,sample_fmt,align ? 1 : 0);
 	}
 	finally
 	{
@@ -2283,7 +2276,7 @@ int FFmpeg::AVSamples::alloc(AVPicture^ frame,int nb_channels, int nb_samples,AV
 	uint8_t *_data[AV_NUM_DATA_POINTERS] = { 0 };
 	try
 	{
-		return av_samples_alloc(_data,&_linesize,nb_channels, nb_samples,(::AVSampleFormat)sample_fmt,align ? 1 : 0);
+		return av_samples_alloc(_data,&_linesize,nb_channels, nb_samples,sample_fmt,align ? 1 : 0);
 	}
 	finally
 	{
@@ -2323,14 +2316,14 @@ int FFmpeg::AVSamples::set_silence(array<IntPtr>^ audio_data, int offset, int nb
 {
 	uint8_t *_data[AV_NUM_DATA_POINTERS] = { 0 };
 	for (int i = 0; i < audio_data->Length && i < AV_NUM_DATA_POINTERS; i++) { _data[i] = (uint8_t *)audio_data[i].ToPointer(); } 
-	return av_samples_set_silence(_data,offset,nb_samples,nb_channels,(::AVSampleFormat)sample_fmt);
+	return av_samples_set_silence(_data,offset,nb_samples,nb_channels,sample_fmt);
 }
 
 int FFmpeg::AVSamples::set_silence(AVPicture^ dst, int offset, int nb_samples,
                            int nb_channels, AVSampleFormat sample_fmt)
 {
-	uint8_t **_data = (uint8_t **)dst->data->_Pointer.ToPointer();
-	return av_samples_set_silence(_data,offset,nb_samples,nb_channels,(::AVSampleFormat)sample_fmt);
+	auto _data = (uint8_t **)dst->data->_Pointer.ToPointer();
+	return av_samples_set_silence(_data,offset,nb_samples,nb_channels,sample_fmt);
 }
 //////////////////////////////////////////////////////
 // AVMath
@@ -2357,17 +2350,17 @@ Int64 FFmpeg::AVMath::rescale_rnd(Int64 a, Int64 b, Int64 c, AVRounding r)
 
 Int64 FFmpeg::AVMath::rescale_q(Int64 a, AVRational^ bq, AVRational^ cq)
 {
-	return av_rescale_q(a,*((::AVRational*)bq->_Pointer.ToPointer()),*((::AVRational*)cq->_Pointer.ToPointer()));
+	return av_rescale_q(a,*(::AVRational*)bq->_Pointer.ToPointer(),*(::AVRational*)cq->_Pointer.ToPointer());
 }
 
 Int64 FFmpeg::AVMath::rescale_q_rnd(Int64 a, AVRational^ bq, AVRational^ cq,AVRounding r)
 {
-	return av_rescale_q_rnd(a,*((::AVRational*)bq->_Pointer.ToPointer()),*((::AVRational*)cq->_Pointer.ToPointer()),(::AVRounding)r);
+	return av_rescale_q_rnd(a,*(::AVRational*)bq->_Pointer.ToPointer(),*(::AVRational*)cq->_Pointer.ToPointer(),(::AVRounding)r);
 }
 
 int FFmpeg::AVMath::compare_ts(Int64 ts_a, AVRational^ tb_a, Int64 ts_b, AVRational^ tb_b)
 {
-	return av_compare_ts(ts_a,*((::AVRational*)tb_a->_Pointer.ToPointer()),ts_b,*((::AVRational*)tb_b->_Pointer.ToPointer()));
+	return av_compare_ts(ts_a,*(::AVRational*)tb_a->_Pointer.ToPointer(),ts_b,*(::AVRational*)tb_b->_Pointer.ToPointer());
 }
 
 Int64 FFmpeg::AVMath::compare_mod(UInt64 a, UInt64 b, UInt64 mod)
@@ -2380,7 +2373,7 @@ Int64 FFmpeg::AVMath::rescale_delta(AVRational^ in_tb, Int64 in_ts,  AVRational^
 	int64_t _last = last;
 	try
 	{	
-		return av_rescale_delta(*((::AVRational*)in_tb->_Pointer.ToPointer()),in_ts,*((::AVRational*)fs_tb->_Pointer.ToPointer()),duration, &_last,*((::AVRational*)out_tb->_Pointer.ToPointer()));
+		return av_rescale_delta(*(::AVRational*)in_tb->_Pointer.ToPointer(),in_ts,*(::AVRational*)fs_tb->_Pointer.ToPointer(),duration, &_last,*(::AVRational*)out_tb->_Pointer.ToPointer());
 	}
 	finally
 	{
@@ -2390,7 +2383,7 @@ Int64 FFmpeg::AVMath::rescale_delta(AVRational^ in_tb, Int64 in_ts,  AVRational^
 
 Int64 FFmpeg::AVMath::add_stable(AVRational^ ts_tb, Int64 ts, AVRational^ inc_tb, Int64 inc)
 {
-	return av_add_stable(*((::AVRational*)ts_tb->_Pointer.ToPointer()),ts,*((::AVRational*)inc_tb->_Pointer.ToPointer()),inc);
+	return av_add_stable(*(::AVRational*)ts_tb->_Pointer.ToPointer(),ts,*(::AVRational*)inc_tb->_Pointer.ToPointer(),inc);
 }
 //////////////////////////////////////////////////////
 // AVUtil
@@ -2458,15 +2451,13 @@ UInt32 FFmpeg::AVUtil::get_random_seed()
 
 String^ FFmpeg::AVUtil::ts2timestr(Int64 ts, AVRational^ tb)
 {
-	char _temp[AV_TS_MAX_STRING_SIZE];
-	memset(_temp,0,sizeof(_temp));
+	char _temp[AV_TS_MAX_STRING_SIZE] = {};
 	return gcnew String(av_ts_make_time_string(_temp,ts,tb != nullptr? (::AVRational*)tb->_Pointer.ToPointer() : nullptr));
 }
 
 String^ FFmpeg::AVUtil::ts2timestr(Int64 ts)
 {
-	char _temp[AV_TS_MAX_STRING_SIZE];
-	memset(_temp,0,sizeof(_temp));
+	char _temp[AV_TS_MAX_STRING_SIZE] = {};
 	return gcnew String(av_ts_make_string(_temp,ts));
 }
 
@@ -2504,7 +2495,7 @@ FFmpeg::AVOptionType FFmpeg::AVOption::type::get()
 }
 IntPtr FFmpeg::AVOption::default_val::get()
 {
-	return (IntPtr)((void*)((::AVOption*)m_pPointer)->default_val.str);
+	return (IntPtr)(void*)((::AVOption*)m_pPointer)->default_val.str;
 }
 double FFmpeg::AVOption::min::get()
 {
@@ -2516,7 +2507,7 @@ double FFmpeg::AVOption::max::get()
 }
 FFmpeg::AVOptFlag FFmpeg::AVOption::flags::get()
 {
-	return (FFmpeg::AVOptFlag)((::AVOption*)m_pPointer)->flags;
+	return (AVOptFlag)((::AVOption*)m_pPointer)->flags;
 }
 String^ FFmpeg::AVOption::unit::get()
 {
@@ -2558,7 +2549,7 @@ FFmpeg::AVOptions::Enumerator::~Enumerator()
 // IEnumerator
 bool FFmpeg::AVOptions::Enumerator::MoveNext()
 {
-	const ::AVOption * p = (const ::AVOption *)m_pOption.ToPointer();
+	auto p = (const ::AVOption *)m_pOption.ToPointer();
 	m_pOption = (IntPtr)(void*)av_opt_next(m_pParent->_Pointer.ToPointer(), p);
 	return m_pOption != IntPtr::Zero;
 }
@@ -2635,14 +2626,14 @@ int FFmpeg::AVOptions::IndexOf(String^ name)
 	int index = -1;
 	if (name != nullptr && name->Length > 0)
 	{
-		char * _name = (char *)AllocString(name).ToPointer();
+		auto _name = (char *)AllocString(name).ToPointer();
 		try
 		{
 			const ::AVOption * p = nullptr;;
 			while ((p = av_opt_next(m_pPointer, p)) != nullptr && !found)
 			{
 				index++;
-				found = (_stricmp(p->name,_name) == 0);
+				found = _stricmp(p->name,_name) == 0;
 			}
 		}
 		finally
@@ -2663,7 +2654,7 @@ int FFmpeg::AVOptions::IndexOf(AVOption^ value)
 		while ((p = av_opt_next(m_pPointer, p)) != nullptr && !found)
 		{
 			index++;
-			found = (p == value->_Pointer.ToPointer());
+			found = p == value->_Pointer.ToPointer();
 		}
 	}
 	return found ? index : -1;
@@ -2707,7 +2698,7 @@ bool FFmpeg::AVOptions::opt_flag_is_set( String^ field_name, String^ flag_name)
 	{
 		_field_name = (char*)AllocString(field_name).ToPointer();
 		_flag_name = (char*)AllocString(flag_name).ToPointer();
-		return (0 != av_opt_flag_is_set(m_pPointer, _field_name,_flag_name));
+		return 0 != av_opt_flag_is_set(m_pPointer, _field_name,_flag_name);
 	}
 	finally
 	{
@@ -2875,7 +2866,7 @@ FFmpeg::AVOption^ FFmpeg::AVOptions::Find(String^ name,String^ unit,AVOptFlag op
 		_name = (char*)AllocString(name).ToPointer();
 		_unit = (char*)AllocString(unit).ToPointer();
 		const ::AVOption * p = av_opt_find2(m_pPointer,_name,_unit,(int)opt_flags,(int)search_flags,&_object);
-		return (p != nullptr) ? _CreateChildObject<AVOption>((void*)p,this) : nullptr;
+		return p != nullptr ? _CreateChildObject<AVOption>((void*)p,this) : nullptr;
 	}
 	finally
 	{
@@ -2888,13 +2879,13 @@ FFmpeg::AVOption^ FFmpeg::AVOptions::Find(String^ name,String^ unit,AVOptFlag op
 FFmpeg::AVOption^ FFmpeg::AVOptions::Next(AVOption^ prev)
 {
 	auto p = av_opt_next(m_pPointer,(const ::AVOption*)(prev != nullptr ? prev->_Pointer.ToPointer() : nullptr));
-	return (p != nullptr) ? _CreateChildObject<AVOption>((void*)p,this) : nullptr;
+	return p != nullptr ? _CreateChildObject<AVOption>((void*)p,this) : nullptr;
 }
 
 FFmpeg::AVBase^ FFmpeg::AVOptions::child_next(AVBase^ prev)
 {
 	auto p = av_opt_child_next(m_pPointer,prev != nullptr ? prev->_Pointer.ToPointer() : nullptr);
-	return (p != nullptr) ? _CreateChildObject<AVOption>((void*)p,this) : nullptr;
+	return p != nullptr ? _CreateChildObject<AVOption>(p,this) : nullptr;
 }
 
 FFmpeg::AVRESULT FFmpeg::AVOptions::set(String^ name, String^ val, AVOptSearch search_flags)
@@ -2946,7 +2937,7 @@ FFmpeg::AVRESULT FFmpeg::AVOptions::set_q( String^ name, AVRational^ val, AVOptS
 	try
 	{
 		_name = (char*)AllocString(name).ToPointer();
-		return av_opt_set_q(m_pPointer,_name,*((::AVRational*)(val->_Pointer.ToPointer())),(int)search_flags);
+		return av_opt_set_q(m_pPointer,_name,*(::AVRational*)val->_Pointer.ToPointer(),(int)search_flags);
 	}
 	finally
 	{
@@ -2985,7 +2976,7 @@ FFmpeg::AVRESULT FFmpeg::AVOptions::set_pixel_fmt( String^ name, AVPixelFormat f
 	try
 	{
 		_name = (char*)AllocString(name).ToPointer();
-		return av_opt_set_pixel_fmt(m_pPointer,_name,(::AVPixelFormat)fmt,(int)search_flags);
+		return av_opt_set_pixel_fmt(m_pPointer,_name,fmt,(int)search_flags);
 	}
 	finally
 	{
@@ -2998,7 +2989,7 @@ FFmpeg::AVRESULT FFmpeg::AVOptions::set_sample_fmt( String^ name, AVSampleFormat
 	try
 	{
 		_name = (char*)AllocString(name).ToPointer();
-		return av_opt_set_sample_fmt(m_pPointer,_name,(::AVSampleFormat)fmt,(int)search_flags);
+		return av_opt_set_sample_fmt(m_pPointer,_name,fmt,(int)search_flags);
 	}
 	finally
 	{
@@ -3011,7 +3002,7 @@ FFmpeg::AVRESULT FFmpeg::AVOptions::set_video_rate( String^ name, AVRational^ va
 	try
 	{
 		_name = (char*)AllocString(name).ToPointer();
-		return av_opt_set_video_rate(m_pPointer,_name,*((::AVRational*)(val->_Pointer.ToPointer())),(int)search_flags);
+		return av_opt_set_video_rate(m_pPointer,_name,*(::AVRational*)val->_Pointer.ToPointer(),(int)search_flags);
 	}
 	finally
 	{
@@ -3024,7 +3015,7 @@ FFmpeg::AVRESULT FFmpeg::AVOptions::set_channel_layout( String^ name, AVChannelL
 	try
 	{
 		_name = (char*)AllocString(name).ToPointer();
-		return av_opt_set_channel_layout(m_pPointer,_name,(int64_t)ch_layout,(int)search_flags);
+		return av_opt_set_channel_layout(m_pPointer,_name,ch_layout,(int)search_flags);
 	}
 	finally
 	{
@@ -3041,7 +3032,7 @@ FFmpeg::AVRESULT FFmpeg::AVOptions::set_int_list(String^ name, array<int>^ val, 
 		{
 			int size = val != nullptr ? val->Length * sizeof(int) : 0;
 			pin_ptr<int> _ptr = &val[0];
-			uint8_t * data = ((uint8_t *)_ptr);
+			auto data = (uint8_t *)_ptr;
 			return av_opt_set_bin(m_pPointer,_name,data,size,(int)search_flags);
 		}
 		return av_opt_set_bin(m_pPointer,_name,nullptr,0,(int)search_flags);
@@ -3062,7 +3053,7 @@ FFmpeg::AVRESULT FFmpeg::AVOptions::set_int_list(String^ name, array<Int64>^ val
 		{
 			int size = val != nullptr ? val->Length * sizeof(Int64) : 0;
 			pin_ptr<__int64> _ptr = &val[0];
-			uint8_t * data = ((uint8_t *)_ptr);
+			auto data = (uint8_t *)_ptr;
 			return av_opt_set_bin(m_pPointer,_name,data,size,(int)search_flags);
 		}
 		return av_opt_set_bin(m_pPointer,_name,nullptr,0,(int)search_flags);
@@ -3386,7 +3377,7 @@ int FFmpeg::AVOptionRange::_StructureSize::get()
 //////////////////////////////////////////////////////
 IntPtr FFmpeg::AVOptionRange::str::get()
 {
-	return (IntPtr)((void*)((::AVOptionRange*)m_pPointer)->str);
+	return (IntPtr)(void*)((::AVOptionRange*)m_pPointer)->str;
 }
 double FFmpeg::AVOptionRange::value_min::get()
 {
@@ -3406,7 +3397,7 @@ double FFmpeg::AVOptionRange::component_max::get()
 }
 bool FFmpeg::AVOptionRange::is_range::get()
 {
-	return (((::AVOptionRange*)m_pPointer)->is_range == 1);
+	return ((::AVOptionRange*)m_pPointer)->is_range == 1;
 }
 //////////////////////////////////////////////////////
 // AVOptionRangesEnumerator
@@ -3425,7 +3416,7 @@ FFmpeg::AVOptionRanges::AVOptionRangesEnumerator::~AVOptionRangesEnumerator()
 // IEnumerator
 bool FFmpeg::AVOptionRanges::AVOptionRangesEnumerator::MoveNext()
 {
-	::AVOptionRanges* pRanges = (::AVOptionRanges*)m_pRanges->m_pPointer;
+	auto pRanges = (::AVOptionRanges*)m_pRanges->m_pPointer;
 	if (m_nIndex + 1 >= pRanges->nb_components * pRanges->nb_ranges)
 	{
 		return false;
@@ -3435,12 +3426,12 @@ bool FFmpeg::AVOptionRanges::AVOptionRangesEnumerator::MoveNext()
 }
 FFmpeg::AVOptionRange^ FFmpeg::AVOptionRanges::AVOptionRangesEnumerator::Current::get()
 {
-	::AVOptionRanges* pRanges = (::AVOptionRanges*)m_pRanges->m_pPointer;
+	auto pRanges = (::AVOptionRanges*)m_pRanges->m_pPointer;
 	if (m_nIndex == -1)
 	{
 		if (!MoveNext()) return nullptr;
 	}
-	return _CreateChildObject<FFmpeg::AVOptionRange>((void*)pRanges->range[m_nIndex],m_pRanges);
+	return _CreateChildObject<FFmpeg::AVOptionRange>(pRanges->range[m_nIndex],m_pRanges);
 	//return gcnew AVOptionRange(pRanges->range[m_nIndex]);
 }
 void FFmpeg::AVOptionRanges::AVOptionRangesEnumerator::Reset()
@@ -3475,7 +3466,7 @@ array<FFmpeg::AVOptionRange^>^ FFmpeg::AVOptionRanges::range::get()
 		_array =  gcnew List<FFmpeg::AVOptionRange^>();
 		while (nCount-- > 0)
 		{
-			_array->Add(_CreateObject<FFmpeg::AVOptionRange>((void*)pRanges++));
+			_array->Add(_CreateObject<FFmpeg::AVOptionRange>(pRanges++));
 			//_array->Add(gcnew AVOptionRange((void*)pRanges++));
 		}
 	}
@@ -3492,12 +3483,12 @@ int FFmpeg::AVOptionRanges::nb_components::get()
 //////////////////////////////////////////////////////
 FFmpeg::AVOptionRange^ FFmpeg::AVOptionRanges::default::get(int _component,int _range)
 {
-	::AVOptionRanges* pRanges = (::AVOptionRanges*)m_pPointer;
+	auto pRanges = (::AVOptionRanges*)m_pPointer;
 	if (_component < 0 || _component > pRanges->nb_components || _range < 0 || _range > pRanges->nb_ranges) 
 	{
 		throw gcnew ArgumentOutOfRangeException();
 	}
-	return _CreateObject<FFmpeg::AVOptionRange>((void*)pRanges->range[ _component * pRanges->nb_ranges + _range]);
+	return _CreateObject<FFmpeg::AVOptionRange>(pRanges->range[ _component * pRanges->nb_ranges + _range]);
 	//return gcnew AVOptionRange((void*)pRanges->range[ _component * pRanges->nb_ranges + _range]);
 }
 //////////////////////////////////////////////////////
@@ -3550,7 +3541,7 @@ bool FFmpeg::AVClass::Enumerator::MoveNext()
 	}
 	m_pCurrent = _CreateChildObject<AVClass>(p,m_pParent);
 	m_pOpaque = IntPtr(opaque);
-	return (m_pCurrent != nullptr);
+	return m_pCurrent != nullptr;
 }
 FFmpeg::AVClass^ FFmpeg::AVClass::Enumerator::Current::get()
 {
@@ -3583,14 +3574,14 @@ String^ FFmpeg::AVClass::class_name::get()
 }
 
 array<FFmpeg::AVOption^>^ FFmpeg::AVClass::option::get()
-{ 
-	List<AVOption^>^ list = gcnew List<AVOption^>();
-	const ::AVOption * p = (const ::AVOption *)((::AVClass*) m_pPointer)->option;
+{
+	auto list = gcnew List<AVOption^>();
+	auto p = ((::AVClass*) m_pPointer)->option;
 	if (p)
 	{
 		while (p->name)
 		{
-			list->Add(_CreateObject<AVOption>((void*)(p)));
+			list->Add(_CreateObject<AVOption>((void*)p));
 			p++;
 		}
 	}
@@ -3614,7 +3605,7 @@ int FFmpeg::AVClass::parent_log_context_offset::get()
 
 FFmpeg::AVClassCategory FFmpeg::AVClass::category::get()
 {
-	return (FFmpeg::AVClassCategory)(((::AVClass*) m_pPointer)->category);
+	return (FFmpeg::AVClassCategory)((::AVClass*) m_pPointer)->category;
 }
 //////////////////////////////////////////////////////
 String^ FFmpeg::AVClass::ToString()
@@ -3691,7 +3682,7 @@ int FFmpeg::AVCodecDescriptor::AVMimeTypes::Count::get()
 }
 array<String^>^ FFmpeg::AVCodecDescriptor::AVMimeTypes::ToArray()
 {
-	List<String^>^ list = gcnew List<String^>();
+	auto list = gcnew List<String^>();
 	try
 	{
 		int idx = 0;
@@ -3775,7 +3766,7 @@ int FFmpeg::AVCodecDescriptor::AVProfiles::Count::get()
 }
 array<FFmpeg::AVProfile^>^ FFmpeg::AVCodecDescriptor::AVProfiles::ToArray()
 {
-	List<AVProfile^>^ list = gcnew List<AVProfile^>();
+	auto list = gcnew List<AVProfile^>();
 	int idx = 0;
 	while (true)
 	{
@@ -3840,7 +3831,7 @@ Object^ FFmpeg::AVCodecDescriptor::AVProfiles::AVProfilesEnumerator::CurrentObje
 bool FFmpeg::AVCodecDescriptor::AVCodecDescriptors::Enumerator::MoveNext()
 {
 	m_pCurrent = AVCodecDescriptor::Next(m_pCurrent);
-	return (m_pCurrent != nullptr);
+	return m_pCurrent != nullptr;
 }
 FFmpeg::AVCodecDescriptor^ FFmpeg::AVCodecDescriptor::AVCodecDescriptors::Enumerator::Current::get()
 {
@@ -3865,11 +3856,11 @@ FFmpeg::AVCodecDescriptor::AVCodecDescriptor(void * _pointer,AVBase^ _parent)
 //////////////////////////////////////////////////////
 FFmpeg::AVCodecID FFmpeg::AVCodecDescriptor::id::get()
 {
-	return (FFmpeg::AVCodecID)(((::AVCodecDescriptor*) m_pPointer)->id);
+	return (FFmpeg::AVCodecID)((::AVCodecDescriptor*) m_pPointer)->id;
 }
 FFmpeg::AVMediaType FFmpeg::AVCodecDescriptor::type::get()
 {
-	return (FFmpeg::AVMediaType)(((::AVCodecDescriptor*) m_pPointer)->type);
+	return (FFmpeg::AVMediaType)((::AVCodecDescriptor*) m_pPointer)->type;
 }
 String^ FFmpeg::AVCodecDescriptor::name::get()
 {
@@ -3883,7 +3874,7 @@ String^ FFmpeg::AVCodecDescriptor::long_name::get()
 }
 FFmpeg::AVCodecProp FFmpeg::AVCodecDescriptor::props::get()
 {
-	return (FFmpeg::AVCodecProp)(((::AVCodecDescriptor*) m_pPointer)->props);
+	return (FFmpeg::AVCodecProp)((::AVCodecDescriptor*) m_pPointer)->props;
 }
 FFmpeg::AVCodecDescriptor::AVMimeTypes^ FFmpeg::AVCodecDescriptor::mime_types::get()
 {
@@ -3935,8 +3926,7 @@ String^ FFmpeg::AVCodecDescriptor::ToString()
 {
 	if (m_pPointer)
 	{
-		String^ _name;
-		_name = long_name;
+		String^ _name = long_name;
 		if (String::IsNullOrEmpty(_name))
 		{
 			_name = name;
@@ -4090,23 +4080,23 @@ int FFmpeg::AVRational::GetHashCode()
 bool FFmpeg::AVRational::Equals(Object^ obj)
 {
 	if (Object::ReferenceEquals(this,obj)) return true;
-	AVRational^ _object = dynamic_cast<AVRational^>(obj);
+	auto _object = dynamic_cast<AVRational^>(obj);
 	if (_object != nullptr)
 	{
 		if (_object->m_pPointer == m_pPointer) return true;
-		return (_object->num == this->num && _object->den == this->den);
+		return _object->num == this->num && _object->den == this->den;
 	}
 	else
 	{
 		{
-			Int64^ _value = dynamic_cast<Int64^>(obj);
+			auto _value = dynamic_cast<Int64^>(obj);
 			if (_value != nullptr)
 			{
 				return _value == ToLong();
 			}
 		}
 		{
-			double^ _value = dynamic_cast<double^>(obj);
+			auto _value = dynamic_cast<double^>(obj);
 			if (_value != nullptr)
 			{
 				return _value == ToDouble();
@@ -4145,7 +4135,7 @@ FFmpeg::AVRational^ FFmpeg::AVRational::inv_q()
 //////////////////////////////////////////////////////
 int FFmpeg::AVRational::find_nearest_q_idx(array<FFmpeg::AVRational^>^ _list)
 {
-	::AVRational * q_list = (::AVRational *)av_mallocz(sizeof(::AVRational) * (_list->Length + 1));
+	auto q_list = (::AVRational *)av_mallocz(sizeof(::AVRational) * (_list->Length + 1));
 	try
 	{
 		for (int i = 0; i < _list->Length; i++)
@@ -4173,7 +4163,7 @@ int FFmpeg::AVRational::nearer_q(FFmpeg::AVRational^ q1, FFmpeg::AVRational^ q2)
 bool FFmpeg::AVRational::reduce(Int64 _num,Int64 _den,Int64 _max)
 {
 	::AVRational _a = {this->num,this->den };
-	bool _result = (1 == av_reduce(&_a.num, &_a.den, _num, _den, _max));
+	bool _result = 1 == av_reduce(&_a.num, &_a.den, _num, _den, _max);
 	if (_result)
 	{
 		num = _a.num;
@@ -4275,11 +4265,11 @@ bool FFmpeg::AVRational::operator == (FFmpeg::AVRational^ a,FFmpeg::AVRational^ 
 {
 	if ((Object^)a != nullptr && (Object^)b != nullptr)
 	{
-		return (a->num == b->num && a->den == b->den);
+		return a->num == b->num && a->den == b->den;
 	}
 	else
 	{
-		return ((Object^)a == nullptr && (Object^)b == nullptr);
+		return (Object^)a == nullptr && (Object^)b == nullptr;
 	}
 }
 bool FFmpeg::AVRational::operator != (FFmpeg::AVRational^ a,FFmpeg::AVRational^ b)
@@ -4459,7 +4449,7 @@ String^ FFmpeg::AVDictionary::GetValue(String^ _key)
 		System::Collections::IEnumerator^ _enumerator = GetEnumerator();
 		while (_enumerator->MoveNext())
 		{
-			AVDictionaryEntry^ _entry = (AVDictionaryEntry^)_enumerator->Current;
+			auto _entry = (AVDictionaryEntry^)_enumerator->Current;
 			if (_entry->key == _key) return _entry->value;
 		}
 	}
@@ -4785,7 +4775,7 @@ UInt32 FFmpeg::AVCRC::CRC(array<byte>^ buffer,int index, int count)
 //////////////////////////////////////////////////////
 UInt32 FFmpeg::AVCRC::CRC(AVCRCId crc_id, UInt32 crc,IntPtr buffer, int length)
 {
-	AVCRC^ _crc = gcnew AVCRC(crc_id);
+	auto _crc = gcnew AVCRC(crc_id);
 	try
 	{
 		return _crc->CRC(crc, buffer, length);
@@ -4797,7 +4787,7 @@ UInt32 FFmpeg::AVCRC::CRC(AVCRCId crc_id, UInt32 crc,IntPtr buffer, int length)
 }
 UInt32 FFmpeg::AVCRC::CRC(AVCRCId crc_id, UInt32 crc,array<byte>^ buffer, int index, int count)
 {
-	AVCRC^ _crc = gcnew AVCRC(crc_id);
+	auto _crc = gcnew AVCRC(crc_id);
 	try
 	{
 		return _crc->CRC(crc, buffer, index, count);
@@ -4815,7 +4805,7 @@ struct AVAudioFifo {};
 FFmpeg::AVAudioFifo::AVAudioFifo(AVSampleFormat sample_fmt, int channels,int nb_samples)
 	: AVBase(nullptr,nullptr)
 {
-	m_pPointer = av_audio_fifo_alloc((::AVSampleFormat)sample_fmt, channels, nb_samples);
+	m_pPointer = av_audio_fifo_alloc(sample_fmt, channels, nb_samples);
 	m_pFree = (TFreeFN*)av_audio_fifo_free;
 }
 //////////////////////////////////////////////////////
@@ -4857,7 +4847,7 @@ int FFmpeg::AVAudioFifo::Write(IntPtr data, int nb_samples)
 }
 int FFmpeg::AVAudioFifo::Write(AVArray<IntPtr>^ data, int nb_samples)
 {
-	void ** _data = (void**)data->_Pointer.ToPointer();
+	auto _data = (void**)data->_Pointer.ToPointer();
 	return av_audio_fifo_write((::AVAudioFifo*)m_pPointer,_data,nb_samples);
 }
 //////////////////////////////////////////////////////
@@ -4874,7 +4864,7 @@ int FFmpeg::AVAudioFifo::Read(IntPtr data, int nb_samples)
 }
 int FFmpeg::AVAudioFifo::Read(AVArray<IntPtr>^ data, int nb_samples)
 {
-	void ** _data = (void**)data->_Pointer.ToPointer();
+	auto _data = (void**)data->_Pointer.ToPointer();
 	return av_audio_fifo_read((::AVAudioFifo*)m_pPointer,_data,nb_samples);
 }
 //////////////////////////////////////////////////////
@@ -5022,7 +5012,7 @@ void FFmpeg::AVMD5::Update(array<byte>^ src, int length)
 void FFmpeg::AVMD5::Update(array<byte>^ src, int start, int length)
 {
 	pin_ptr<byte> _ptr = &src[0];
-	uint8_t * data = ((uint8_t *)_ptr) + start;
+	uint8_t * data = (uint8_t *)_ptr + start;
 	Update((IntPtr)data,length);
 }
 void FFmpeg::AVMD5::Final(IntPtr dst)
@@ -5034,7 +5024,7 @@ void FFmpeg::AVMD5::Final(array<byte>^ % dst)
 {
 	dst = gcnew array<byte>(16);
 	pin_ptr<byte> _ptr = &dst[0];
-	uint8_t * data = ((uint8_t *)_ptr);
+	auto data = (uint8_t *)_ptr;
 	Final((IntPtr)data);
 }
 //////////////////////////////////////////////////////
@@ -5046,7 +5036,7 @@ void FFmpeg::AVMD5::sum(IntPtr dst, IntPtr src, int len)
 void FFmpeg::AVMD5::sum(IntPtr dst, array<byte>^ src, int start, int len)
 {
 	pin_ptr<byte> _ptr = &src[0];
-	uint8_t * data = ((uint8_t *)_ptr) + start;
+	uint8_t * data = (uint8_t *)_ptr + start;
 	sum(dst,(IntPtr)data,len);
 }
 void FFmpeg::AVMD5::sum(IntPtr dst, array<byte>^ src, int len)
@@ -5061,9 +5051,9 @@ void FFmpeg::AVMD5::sum(array<byte>^ % dst, array<byte>^ src, int start, int len
 {
 	dst = gcnew array<byte>(16);
 	pin_ptr<byte> _dst = &dst[0];
-	uint8_t * dst_p = ((uint8_t *)_dst);
+	auto dst_p = (uint8_t *)_dst;
 	pin_ptr<byte> _src = &src[0];
-	uint8_t * src_p = ((uint8_t *)_src) + start;
+	uint8_t * src_p = (uint8_t *)_src + start;
 	sum((IntPtr)dst_p,(IntPtr)src_p,len);
 }
 void FFmpeg::AVMD5::sum(array<byte>^ % dst, array<byte>^ src, int len)

@@ -94,7 +94,7 @@ FFmpeg::AVIOProtocolEnum::AVIOProtocolEnumerator::~AVIOProtocolEnumerator()
 bool FFmpeg::AVIOProtocolEnum::AVIOProtocolEnumerator::MoveNext()
 {
 	void * opaque = m_pOpaque;
-	m_pCurrent = (void*)avio_enum_protocols((void**)&opaque,m_bOutput ? 1 : 0);
+	m_pCurrent = (void*)avio_enum_protocols(&opaque,m_bOutput ? 1 : 0);
 	m_pOpaque = opaque;
 	return m_pCurrent != nullptr;
 }
@@ -192,7 +192,7 @@ int Generic_interrupt_callback(void *opaque)
 	GCHandle _handle = GCHandle::FromIntPtr((IntPtr)opaque);
 	if (_handle.IsAllocated)
 	{
-		FFmpeg::AVIOInterruptDesc^ _desc = ((FFmpeg::AVIOInterruptDesc^)_handle.Target);
+		auto _desc = (FFmpeg::AVIOInterruptDesc^)_handle.Target;
 		if (_desc->callback)
 		{
 			if (_desc->callback(_desc->opaque))
@@ -224,7 +224,7 @@ FFmpeg::AVIOContext::AVIOContext(String^ _url, FFmpeg::AvioFlag _flags)
 	, m_pOpaque(nullptr)
 	, m_pBuffer(nullptr)
 {
-	AVDictionary^ _dictionary = gcnew AVDictionary();
+	auto _dictionary = gcnew AVDictionary();
 	Open(_url, _flags, nullptr, _dictionary);
 	delete _dictionary;
 }
@@ -238,7 +238,7 @@ FFmpeg::AVIOContext::AVIOContext(String^ _url, FFmpeg::AvioFlag _flags, FFmpeg::
 	, m_pOpaque(nullptr)
 	, m_pBuffer(nullptr)
 {
-	AVDictionary^ _dictionary = gcnew AVDictionary();
+	auto _dictionary = gcnew AVDictionary();
 	Open(_url, _flags, int_cb != nullptr ? gcnew AVIOInterruptDesc(int_cb, opaque) : nullptr, _dictionary);
 	delete _dictionary;
 }
@@ -269,7 +269,7 @@ FFmpeg::AVIOContext::AVIOContext(AVMemPtr^ buf, int write_flag, Object^ opaque, 
 	m_pPointer = avio_alloc_context((unsigned char*)buf->m_pPointer,buf->size,write_flag,_this.ToPointer(),
 		read_packet != nullptr ? AVIOContext_read_packet : nullptr,
 		write_packet != nullptr ? AVIOContext_write_packet : nullptr,
-		(seek != nullptr || write_packet != nullptr) ? AVIOContext_seek : nullptr);
+		seek != nullptr || write_packet != nullptr ? AVIOContext_seek : nullptr);
 	if (m_pPointer)
 	{
 		m_pFreep = (TFreeFNP*)avio_context_free;
@@ -609,7 +609,7 @@ bool FFmpeg::AVIOContext::Open(String^ _url, FFmpeg::AvioFlag _flags, FFmpeg::AV
 {
 	if (String::IsNullOrEmpty(_url)) return false;
 
-	IntPtr _ptr = (int_cb != nullptr ? GCHandle::ToIntPtr(GCHandle::Alloc(int_cb,GCHandleType::Weak)) : IntPtr::Zero);
+	IntPtr _ptr = int_cb != nullptr ? GCHandle::ToIntPtr(GCHandle::Alloc(int_cb,GCHandleType::Weak)) : IntPtr::Zero;
 	::AVIOInterruptCB _cb = { Generic_interrupt_callback, _ptr.ToPointer() };
 	m_pInterruptCB = int_cb;
 
@@ -637,7 +637,7 @@ bool FFmpeg::AVIOContext::Open(String^ _url, FFmpeg::AvioFlag _flags, FFmpeg::AV
 		}
 		m_pPointer = nullptr;
 		szUrl = (char*)AllocString(_url).ToPointer();
-		_result = (0 <= avio_open2(&_context,szUrl,(int)_flags,int_cb != nullptr ? &_cb : nullptr, &_dict));
+		_result = 0 <= avio_open2(&_context,szUrl,(int)_flags,int_cb != nullptr ? &_cb : nullptr, &_dict);
 		if (options)
 		{
 			options->ChangePointer(_dict);
@@ -1097,7 +1097,7 @@ FFmpeg::AVClass^ FFmpeg::AVOutputFormat::priv_class::get()
 array<FFmpeg::AVCodecTag^>^ FFmpeg::AVOutputFormat::codec_tag::get()
 {
 	List<FFmpeg::AVCodecTag^>^ _list = nullptr;
-	::AVCodecTag ** p = (::AVCodecTag **)((::AVOutputFormat*)m_pPointer)->codec_tag;
+	auto p = (::AVCodecTag **)((::AVOutputFormat*)m_pPointer)->codec_tag;
 	if (p != nullptr && p[0]->id != 0)
 	{
 		_list = gcnew List<FFmpeg::AVCodecTag^>();
@@ -1164,20 +1164,20 @@ FFmpeg::AVOutputFormat^ FFmpeg::AVOutputFormat::Next(AVOutputFormat^ f)
 	LOAD_API(AVFormat,::AVOutputFormat *,av_muxer_iterate,void **);
 	if (av_oformat_next)
 	{
-		p = av_oformat_next(f != nullptr ? (const ::AVOutputFormat*)(f->_Pointer.ToPointer()) : nullptr);
+		p = av_oformat_next(f != nullptr ? (const ::AVOutputFormat*)f->_Pointer.ToPointer() : nullptr);
 	}
 	else
 	{
 		if (av_muxer_iterate)
 		{
 			void * opaque = nullptr;
-			bool bMoveNext = (f != nullptr);
+			bool bMoveNext = f != nullptr;
 			do
 			{
 				p = av_muxer_iterate(&opaque);
 				if (p && bMoveNext)
 				{
-					bMoveNext = (p != f->_Pointer.ToPointer());
+					bMoveNext = p != f->_Pointer.ToPointer();
 					continue;
 				}
 				break;
@@ -1380,7 +1380,7 @@ bool FFmpeg::AVInputFormat::AVInputFormats::AVInputFormatEnumerator::MoveNext()
 	}
 	m_pOpaque = IntPtr(opaque);
 	m_pCurrent = p != nullptr ? gcnew AVInputFormat((void*)p,nullptr) : nullptr;
-	return (m_pCurrent != nullptr);
+	return m_pCurrent != nullptr;
 }
 
 FFmpeg::AVInputFormat^ FFmpeg::AVInputFormat::AVInputFormats::AVInputFormatEnumerator::Current::get()
@@ -1455,7 +1455,7 @@ String^ FFmpeg::AVInputFormat::extensions::get()
 array<FFmpeg::AVCodecTag^>^ FFmpeg::AVInputFormat::codec_tag::get()
 {
 	List<FFmpeg::AVCodecTag^>^ _list = nullptr;
-	::AVCodecTag ** p = (::AVCodecTag **)((::AVInputFormat*)m_pPointer)->codec_tag;
+	auto p = (::AVCodecTag **)((::AVInputFormat*)m_pPointer)->codec_tag;
 	if (p != nullptr && p[0]->id != 0)
 	{
 		_list = gcnew List<FFmpeg::AVCodecTag^>();
@@ -1511,13 +1511,13 @@ FFmpeg::AVInputFormat^ FFmpeg::AVInputFormat::Next(FFmpeg::AVInputFormat^ f)
 		if (av_demuxer_iterate)
 		{
 			void * opaque = nullptr;
-			bool bMoveNext = (f != nullptr);
+			bool bMoveNext = f != nullptr;
 			do
 			{
 				p = av_demuxer_iterate(&opaque);
 				if (p && bMoveNext)
 				{
-					bMoveNext = (p != f->_Pointer.ToPointer());
+					bMoveNext = p != f->_Pointer.ToPointer();
 					continue;
 				}
 				break;
@@ -1616,7 +1616,7 @@ FFmpeg::AVCodecContext^ FFmpeg::AVStream::codec::get()
 {
 #if FF_API_LAVF_AVCTX
 	auto p = ((::AVStream*)m_pPointer)->codec;
-	return _CreateObject<FFmpeg::AVCodecContext>((void*)p);
+	return _CreateObject<FFmpeg::AVCodecContext>(p);
 #endif
 	if (m_pContext == nullptr)
 	{
@@ -1624,9 +1624,9 @@ FFmpeg::AVCodecContext^ FFmpeg::AVStream::codec::get()
 		LOAD_API(AVFormat,::AVCodec *,av_format_get_video_codec,::AVFormatContext *);
 		LOAD_API(AVFormat,::AVCodec *,av_format_get_subtitle_codec,::AVFormatContext *);
 
-		::AVStream* st = (::AVStream*)m_pPointer;
+		auto st = (::AVStream*)m_pPointer;
 		::AVCodecContext* context = nullptr;
-		::AVFormatContext * fmt = (::AVFormatContext *)((AVFormatContext^)m_pParent)->_Pointer.ToPointer();
+		auto fmt = (::AVFormatContext *)((AVFormatContext^)m_pParent)->_Pointer.ToPointer();
 		if (!m_pContext && fmt->iformat)
 		{
 			const ::AVCodec * codec = nullptr;
@@ -1746,7 +1746,7 @@ void FFmpeg::AVStream::codec::set(AVCodecContext^ value)
 {
 #if FF_API_LAVF_AVCTX
 	AddObject((IntPtr)((::AVStream*)m_pPointer)->codec,value);
-	((::AVStream*)m_pPointer)->codec = (value != nullptr ? (::AVCodecContext*)value->_Pointer.ToPointer() : nullptr);
+	((::AVStream*)m_pPointer)->codec = value != nullptr ? (::AVCodecContext*)value->_Pointer.ToPointer() : nullptr;
 #endif
 	AVBase^ ctx = m_pContext;
 	if (value != nullptr)
@@ -1771,7 +1771,7 @@ void FFmpeg::AVStream::priv_data::set(IntPtr value)
 }
 FFmpeg::AVRational^ FFmpeg::AVStream::time_base::get()
 {
-	return _CreateObject<AVRational>((void*)&((::AVStream*)m_pPointer)->time_base);
+	return _CreateObject<AVRational>(&((::AVStream*)m_pPointer)->time_base);
 	//return gcnew AVRational(&((::AVStream*)m_pPointer)->time_base);
 }
 void FFmpeg::AVStream::time_base::set(AVRational^ value)
@@ -2257,7 +2257,7 @@ FFmpeg::AVClass^ FFmpeg::AVFormatContext::av_class::get()
 FFmpeg::AVInputFormat^ FFmpeg::AVFormatContext::iformat::get()
 { 
 	auto p = ((::AVFormatContext*)m_pPointer)->iformat;
-	return _CreateObject<AVInputFormat>((void*)p);
+	return _CreateObject<AVInputFormat>(p);
 }
 
 void FFmpeg::AVFormatContext::iformat::set(AVInputFormat^ value)
@@ -2269,7 +2269,7 @@ void FFmpeg::AVFormatContext::iformat::set(AVInputFormat^ value)
 FFmpeg::AVOutputFormat^ FFmpeg::AVFormatContext::oformat::get()
 {
 	auto p = ((::AVFormatContext*)m_pPointer)->oformat;
-	return _CreateObject<AVOutputFormat>((void*)p);
+	return _CreateObject<AVOutputFormat>(p);
 }
 
 void FFmpeg::AVFormatContext::oformat::set(AVOutputFormat^ value)
@@ -2286,12 +2286,12 @@ IntPtr FFmpeg::AVFormatContext::priv_data::get()
 FFmpeg::AVIOContext^ FFmpeg::AVFormatContext::pb::get()
 {
 	auto p = ((::AVFormatContext*)m_pPointer)->pb;
-	return _CreateObject<AVIOContext>((void*)p);
+	return _CreateObject<AVIOContext>(p);
 }
 
 void FFmpeg::AVFormatContext::pb::set(AVIOContext^ value)
 {
-	auto p = ((::AVFormatContext*)m_pPointer);
+	auto p = (::AVFormatContext*)m_pPointer;
 	AddObject((IntPtr)((::AVFormatContext*)m_pPointer)->pb,value);
 	((::AVFormatContext*)m_pPointer)->pb = value != nullptr ? (::AVIOContext*)value->_Pointer.ToPointer() : nullptr;
 }
@@ -2333,7 +2333,7 @@ void FFmpeg::AVFormatContext::filename::set(String^ value)
 		}
 		else
 		{
-			memset(((::AVFormatContext*)m_pPointer)->filename,0x00,sizeof(((::AVFormatContext*)m_pPointer)->filename));
+			memset(((::AVFormatContext*)m_pPointer)->filename,0x00,sizeof((::AVFormatContext*)m_pPointer)->filename);
 		}
 	}
 	finally
@@ -2355,7 +2355,7 @@ void FFmpeg::AVFormatContext::url::set(String^ value)
 	char * _temp = nullptr;
 	try
 	{
-		::AVFormatContext* p = ((::AVFormatContext*)m_pPointer);
+		auto p = (::AVFormatContext*)m_pPointer;
 		if (p->url)
 		{
 			av_freep(&p->url);
@@ -2472,7 +2472,7 @@ array<byte>^ FFmpeg::AVFormatContext::key::get()
 {
 	List<byte>^ _array = nullptr;
 	int nCount = ((::AVFormatContext*)m_pPointer)->keylen;
-	uint8_t * p = (uint8_t *)((::AVFormatContext*)m_pPointer)->key;
+	auto p = (uint8_t *)((::AVFormatContext*)m_pPointer)->key;
 	if (p && nCount > 0)
 	{
 		_array =  gcnew List<byte>();
@@ -2512,7 +2512,7 @@ FFmpeg::AVProgram^ FFmpeg::AVFormatContext::programs::get(int idx)
 {
 	if (((::AVFormatContext*)m_pPointer)->nb_programs <= (unsigned int)idx || idx < 0) return nullptr;
 	auto p = ((::AVFormatContext*)m_pPointer)->programs[idx];
-	return _CreateObject<AVProgram>((void*)p);
+	return _CreateObject<AVProgram>(p);
 }
 
 FFmpeg::AVCodecID FFmpeg::AVFormatContext::video_codec_id::get()
@@ -2582,7 +2582,7 @@ array<FFmpeg::AVChapter^>^ FFmpeg::AVFormatContext::chapters::get()
 {
 	List<FFmpeg::AVChapter^>^ _array = nullptr;
 	int nCount = ((::AVFormatContext*)m_pPointer)->nb_chapters;
-	::AVChapter ** p = (::AVChapter **)((::AVFormatContext*)m_pPointer)->chapters;
+	auto p = ((::AVFormatContext*)m_pPointer)->chapters;
 	if (p && nCount > 0)
 	{
 		_array =  gcnew List<FFmpeg::AVChapter^>();
@@ -2598,7 +2598,7 @@ void FFmpeg::AVFormatContext::chapters::set(array<AVChapter^>^ value)
 {
 	{
 		int nCount = ((::AVFormatContext*)m_pPointer)->nb_chapters;
-		::AVChapter ** p = (::AVChapter **)((::AVFormatContext*)m_pPointer)->chapters;
+		auto p = ((::AVFormatContext*)m_pPointer)->chapters;
 		if (p)
 		{
 			while (nCount-- > 0)
@@ -2612,7 +2612,7 @@ void FFmpeg::AVFormatContext::chapters::set(array<AVChapter^>^ value)
 	}
 	if (value != nullptr && value->Length > 0)
 	{
-		::AVChapter ** p = (::AVChapter **)AllocMemory("chapters",value->Length * (sizeof(::AVChapter*))).ToPointer();
+		auto p = (::AVChapter **)AllocMemory("chapters",value->Length * sizeof(::AVChapter*)).ToPointer();
 		if (p)
 		{
 			((::AVFormatContext*)m_pPointer)->chapters = p;
@@ -2702,7 +2702,7 @@ void FFmpeg::AVFormatContext::interrupt_callback::set(AVIOInterruptDesc^ value)
 	if (m_pInterruptCB != value)
 	{
 		m_pInterruptCB = value;
-		IntPtr _ptr = (value != nullptr ? GCHandle::ToIntPtr(GCHandle::Alloc(value,GCHandleType::Weak)) : IntPtr::Zero);
+		IntPtr _ptr = value != nullptr ? GCHandle::ToIntPtr(GCHandle::Alloc(value,GCHandleType::Weak)) : IntPtr::Zero;
 		((::AVFormatContext*)m_pPointer)->interrupt_callback.opaque = _ptr.ToPointer();
 		((::AVFormatContext*)m_pPointer)->interrupt_callback.callback = m_pInterruptCB == nullptr ? nullptr : Generic_interrupt_callback;
 	}
@@ -2781,9 +2781,9 @@ int FFmpeg::AVFormatContext::max_ts_probe::get()
 }
 void FFmpeg::AVFormatContext::max_ts_probe::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"max_ts_probe",(int64_t)value,0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"max_ts_probe",value,0))
 	{
-		((::AVFormatContext*)m_pPointer)->max_ts_probe = (int)value;
+		((::AVFormatContext*)m_pPointer)->max_ts_probe = value;
 	}
 }
 
@@ -2826,9 +2826,9 @@ int FFmpeg::AVFormatContext::audio_preload::get()
 
 void FFmpeg::AVFormatContext::audio_preload::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"audio_preload",(int64_t)value,0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"audio_preload",value,0))
 	{
-		((::AVFormatContext*)m_pPointer)->audio_preload = (int)value;
+		((::AVFormatContext*)m_pPointer)->audio_preload = value;
 	}
 }
 
@@ -2844,9 +2844,9 @@ int FFmpeg::AVFormatContext::max_chunk_duration::get()
 
 void FFmpeg::AVFormatContext::max_chunk_duration::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"chunk_duration",(int64_t)value,0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"chunk_duration",value,0))
 	{
-		((::AVFormatContext*)m_pPointer)->max_chunk_duration = (int)value;
+		((::AVFormatContext*)m_pPointer)->max_chunk_duration = value;
 	}
 }
 
@@ -2861,9 +2861,9 @@ int FFmpeg::AVFormatContext::max_chunk_size::get()
 }
 void FFmpeg::AVFormatContext::max_chunk_size::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"chunk_size",(int64_t)value,0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"chunk_size",value,0))
 	{
-		((::AVFormatContext*)m_pPointer)->max_chunk_size = (int)value;
+		((::AVFormatContext*)m_pPointer)->max_chunk_size = value;
 	}
 }
 
@@ -2878,9 +2878,9 @@ int FFmpeg::AVFormatContext::use_wallclock_as_timestamps::get()
 }
 void FFmpeg::AVFormatContext::use_wallclock_as_timestamps::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"use_wallclock_as_timestamps",(int64_t)value,0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"use_wallclock_as_timestamps",value,0))
 	{
-		((::AVFormatContext*)m_pPointer)->use_wallclock_as_timestamps = (int)value;
+		((::AVFormatContext*)m_pPointer)->use_wallclock_as_timestamps = value;
 	}
 }
 
@@ -2917,7 +2917,7 @@ Int64 FFmpeg::AVFormatContext::skip_initial_bytes::get()
 }
 void FFmpeg::AVFormatContext::skip_initial_bytes::set(Int64 value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"skip_initial_bytes",(int64_t)value,0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"skip_initial_bytes",value,0))
 	{
 		((::AVFormatContext*)m_pPointer)->skip_initial_bytes = value;
 	}
@@ -2934,7 +2934,7 @@ bool FFmpeg::AVFormatContext::correct_ts_overflow::get()
 }
 void FFmpeg::AVFormatContext::correct_ts_overflow::set(bool value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"correct_ts_overflow",(int64_t)(value ? 1 : 0),0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"correct_ts_overflow",value ? 1 : 0,0))
 	{
 		((::AVFormatContext*)m_pPointer)->correct_ts_overflow = value ? 1 : 0;
 	}
@@ -2951,7 +2951,7 @@ bool FFmpeg::AVFormatContext::seek2any::get()
 }
 void FFmpeg::AVFormatContext::seek2any::set(bool value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"seek2any",(int64_t)(value ? 1 : 0),0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"seek2any",value ? 1 : 0,0))
 	{
 		((::AVFormatContext*)m_pPointer)->seek2any = value ? 1 : 0;
 	}
@@ -2968,7 +2968,7 @@ bool FFmpeg::AVFormatContext::flush_packets::get()
 }
 void FFmpeg::AVFormatContext::flush_packets::set(bool value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"flush_packets",(int64_t)(value ? 1 : 0),0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"flush_packets",value ? 1 : 0,0))
 	{
 		((::AVFormatContext*)m_pPointer)->flush_packets = value ? 1 : 0;
 	}
@@ -2991,7 +2991,7 @@ int FFmpeg::AVFormatContext::format_probesize::get()
 }
 void FFmpeg::AVFormatContext::format_probesize::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"formatprobesize",(int64_t)value,0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"formatprobesize",value,0))
 	{
 		((::AVFormatContext*)m_pPointer)->format_probesize = value;
 	}
@@ -3202,7 +3202,7 @@ Int64 FFmpeg::AVFormatContext::output_ts_offset::get()
 }
 void FFmpeg::AVFormatContext::output_ts_offset::set(Int64 value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"output_ts_offset",(int64_t)value,0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer,"output_ts_offset",value,0))
 	{
 		((::AVFormatContext*)m_pPointer)->output_ts_offset = value;
 	}
@@ -3332,7 +3332,7 @@ FFmpeg::AVStream^ FFmpeg::AVFormatContext::GetStream(int idx)
 {
 	if (((::AVFormatContext*)m_pPointer)->nb_streams <= (unsigned int)idx || idx < 0) return nullptr;
 	auto p = ((::AVFormatContext*)m_pPointer)->streams[idx];
-	return _CreateObject<AVStream>((void*)p);
+	return _CreateObject<AVStream>(p);
 }
 //////////////////////////////////////////////////////
 FFmpeg::AVStream^ FFmpeg::AVFormatContext::AddStream()
@@ -3344,13 +3344,13 @@ FFmpeg::AVStream^ FFmpeg::AVFormatContext::AddStream(AVCodec^ c)
 {
 	auto p = avformat_new_stream((::AVFormatContext*)m_pPointer,c != nullptr ? (::AVCodec*)c->_Pointer.ToPointer() : nullptr);
 	//return p != nullptr ? gcnew FFmpeg::AVStream(p) : nullptr;
-	return _CreateObject<AVStream>((void*)p);
+	return _CreateObject<AVStream>(p);
 }
 
 FFmpeg::AVProgram^ FFmpeg::AVFormatContext::AddProgram(int id)
 {
 	auto p = av_new_program((::AVFormatContext*)m_pPointer,id);
-	return _CreateObject<AVProgram>((void*)p);
+	return _CreateObject<AVProgram>(p);
 	//return p != nullptr ? gcnew FFmpeg::AVProgram(p) : nullptr;
 }
 //////////////////////////////////////////////////////
@@ -3406,8 +3406,8 @@ FFmpeg::AVRESULT FFmpeg::AVFormatContext::OpenInput(AVInputFormat^ format, Strin
 {
 	int _result = -1;
 	char * szFileName = nullptr;
-	::AVFormatContext * p = (::AVFormatContext *)m_pPointer;
-	::AVDictionary * dict = (::AVDictionary *)(options != nullptr ? options->_Pointer.ToPointer() : nullptr);
+	auto p = (::AVFormatContext *)m_pPointer;
+	auto dict = (::AVDictionary *)(options != nullptr ? options->_Pointer.ToPointer() : nullptr);
 	try
 	{
 		szFileName = (char*)AllocString(filename).ToPointer();
@@ -3489,7 +3489,7 @@ FFmpeg::AVRESULT FFmpeg::AVFormatContext::OpenInput(AVFormatContext^ % context, 
 	int _result = -1;
 	char * szFileName = nullptr;
 	::AVFormatContext * p = nullptr;
-	::AVDictionary * dict = (::AVDictionary *)(options != nullptr ? options->_Pointer.ToPointer() : nullptr);
+	auto dict = (::AVDictionary *)(options != nullptr ? options->_Pointer.ToPointer() : nullptr);
 	try
 	{
 		szFileName = (char*)AllocString(filename).ToPointer();
@@ -3547,7 +3547,7 @@ FFmpeg::AVRESULT FFmpeg::AVFormatContext::FindStreamInfo(array<AVDictionary^>^ o
 	int _count = ((::AVFormatContext *)m_pPointer)->nb_streams;
 	if (_count > 0)
 	{
-		::AVDictionary ** _options = (::AVDictionary **)av_mallocz(_count * sizeof(::AVDictionary *));
+		auto _options = (::AVDictionary **)av_mallocz(_count * sizeof(::AVDictionary *));
 		if (options != nullptr)
 		{
 			for (int i = 0; i < options->Length && i < _count; i++)
@@ -3558,7 +3558,7 @@ FFmpeg::AVRESULT FFmpeg::AVFormatContext::FindStreamInfo(array<AVDictionary^>^ o
 		try
 		{
 			_result = avformat_find_stream_info((::AVFormatContext *)m_pPointer, _options);
-			List<AVDictionary^>^ _list = gcnew List<AVDictionary^>();
+			auto _list = gcnew List<AVDictionary^>();
 			for (int i = 0; i < _count; i++)
 			{
 				_list->Add(gcnew AVDictionary(_options[i], nullptr));
@@ -3786,7 +3786,7 @@ FFmpeg::AVRESULT FFmpeg::AVFormatContext::SDP_Create(array<AVFormatContext^>^ ac
 FFmpeg::AVRESULT FFmpeg::AVFormatContext::SDP_Create(array<AVFormatContext^>^ ac, Text::StringBuilder^ sb)
 {
 	size_t cch = 10 * 1024;
-	char * c = (char *)av_mallocz(cch);
+	auto c = (char *)av_mallocz(cch);
 	try
 	{
 		if (SDP_Create(ac,IntPtr(c),(int)cch))
@@ -3805,7 +3805,7 @@ FFmpeg::AVRESULT FFmpeg::AVFormatContext::SDP_Create(array<AVFormatContext^>^ ac
 
 String^ FFmpeg::AVFormatContext::SDP_Create()
 {
-	List<AVFormatContext^>^ ac = gcnew List<AVFormatContext^>();
+	auto ac = gcnew List<AVFormatContext^>();
 	try
 	{
 		ac->Add(this);
@@ -3835,7 +3835,7 @@ FFmpeg::AVFormatContext^ FFmpeg::AVFormatContext::OpenOutput(AVOutputFormat^ for
 }
 void av_format_close_avio(void *ptr)
 {
-	::AVFormatContext * p = (::AVFormatContext *)ptr;
+	auto p = (::AVFormatContext *)ptr;
 	if (p && p->pb && !(p->flags & AVFMT_NOFILE))
 	{
 		avio_closep(&p->pb);
@@ -3856,7 +3856,7 @@ FFmpeg::AVFormatContext^ FFmpeg::AVFormatContext::OpenOutput(FFmpeg::AVOutputFor
 		{
 			if (p != nullptr)
 			{
-				FFmpeg::AVFormatContext^ ctx = gcnew FFmpeg::AVFormatContext(p,nullptr);
+				auto ctx = gcnew FFmpeg::AVFormatContext(p,nullptr);
 				ctx->m_pFree = (TFreeFN*)avformat_free_context;
 				//ctx->m_pDescructor = (TFreeFN*)av_format_close_avio;
 				return ctx;
@@ -3893,7 +3893,7 @@ FFmpeg::AVFormatContext^ FFmpeg::AVFormatContext::OpenInputFile(AVInputFormat^ f
 FFmpeg::AVFormatContext^ FFmpeg::AVFormatContext::OpenInputFile(AVInputFormat^ format, String^ filename, AVDictionary^ options)
 {
 	LibAVFormat::RegisterAll();
-	FFmpeg::AVFormatContext^ ctx = gcnew FFmpeg::AVFormatContext();
+	auto ctx = gcnew FFmpeg::AVFormatContext();
 	if (AVRESULT::OK != ctx->OpenInput(format,filename,options))
 	{
 		delete ctx;
@@ -3928,8 +3928,7 @@ String^ FFmpeg::URLProtocol::ToString()
 {
 	if (m_pPointer)
 	{
-		String^ _name;
-		_name = name;
+		String^ _name = name;
 		if (!String::IsNullOrEmpty(_name)) return "[ URLProtocol ] \"" + _name + "\"";
 	}
 	return Object::ToString();
@@ -4002,8 +4001,7 @@ String^ FFmpeg::URLContext::ToString()
 {
 	if (m_pPointer)
 	{
-		String^ _name;
-		_name = filename;
+		String^ _name = filename;
 		if (!String::IsNullOrEmpty(_name)) return "[ URLContext ] \"" + _name + "\"";
 	}
 	return Object::ToString();
@@ -4074,8 +4072,7 @@ String^ FFmpeg::AVIODirEntry::ToString()
 {
 	if (m_pPointer)
 	{
-		String^ _name;
-		_name = name;
+		String^ _name = name;
 		if (!String::IsNullOrEmpty(_name)) return "[ AVIODirEntry ] \"" + _name +"\"";
 	}
 	return Object::ToString();

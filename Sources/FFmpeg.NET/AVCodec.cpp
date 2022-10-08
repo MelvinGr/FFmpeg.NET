@@ -101,8 +101,8 @@ bool FFmpeg::AVCodec::AVCodecs::AVCodecEnumerator::MoveNext()
 		}
 	}
 	m_pOpaque = IntPtr(opaque);
-	m_pCurrent = (p != nullptr) ? gcnew AVCodec((void*)p, nullptr) : nullptr;
-	return (m_pCurrent != nullptr);
+	m_pCurrent = p != nullptr ? gcnew AVCodec((void*)p, nullptr) : nullptr;
+	return m_pCurrent != nullptr;
 }
 FFmpeg::AVCodec^ FFmpeg::AVCodec::AVCodecs::AVCodecEnumerator::Current::get()
 {
@@ -257,7 +257,7 @@ array<FFmpeg::AVPixelFormat>^ FFmpeg::AVCodec::pix_fmts::get()
 		_array =  gcnew List<AVPixelFormat>();
 		while (*_pointer != -1)
 		{
-			_array->Add((AVPixelFormat)*_pointer++);
+			_array->Add(*_pointer++);
 		}
 	}
 	return _array != nullptr ? _array->ToArray() : nullptr;
@@ -272,7 +272,7 @@ array<int>^ FFmpeg::AVCodec::supported_samplerates::get()
 		_array =  gcnew List<int>();
 		while (*_pointer != 0)
 		{
-			_array->Add((int)*_pointer++);
+			_array->Add(*_pointer++);
 		}
 	}
 	return _array != nullptr ? _array->ToArray() : nullptr;
@@ -287,7 +287,7 @@ array<FFmpeg::AVSampleFormat>^ FFmpeg::AVCodec::sample_fmts::get()
 		_array =  gcnew List<AVSampleFormat>();
 		while (*_pointer != -1)
 		{
-			_array->Add((AVSampleFormat)*_pointer++);
+			_array->Add(*_pointer++);
 		}
 	}
 	return _array != nullptr ? _array->ToArray() : nullptr;
@@ -302,7 +302,7 @@ array<FFmpeg::AVChannelLayout>^ FFmpeg::AVCodec::channel_layouts::get()
 		_array =  gcnew List<AVChannelLayout>();
 		while (*_pointer != 0)
 		{
-			_array->Add((AVChannelLayout)*_pointer++);
+			_array->Add(*_pointer++);
 		}
 	}
 	return _array != nullptr ? _array->ToArray() : nullptr;
@@ -342,7 +342,7 @@ String^ FFmpeg::AVCodec::wrapper_name::get()
 //////////////////////////////////////////////////////
 array<FFmpeg::AVCodecHWConfig^>^ FFmpeg::AVCodec::hw_configs::get()
 {
-	List<FFmpeg::AVCodecHWConfig^>^ _array = gcnew List<FFmpeg::AVCodecHWConfig^>();
+	auto _array = gcnew List<FFmpeg::AVCodecHWConfig^>();
 	int idx = 0;
 	while (true)
 	{
@@ -357,8 +357,7 @@ String^ FFmpeg::AVCodec::ToString()
 {
 	if (m_pPointer)
 	{
-		String^ _name;
-		_name = long_name;
+		String^ _name = long_name;
 
 		if (String::IsNullOrEmpty(_name)) _name = name;
 		if (!String::IsNullOrEmpty(_name))
@@ -376,12 +375,12 @@ FFmpeg::AVCodec^ FFmpeg::AVCodec::Next()
 
 bool FFmpeg::AVCodec::IsDecoder()
 {
-	return (av_codec_is_decoder((const ::AVCodec *)m_pPointer) != 0);
+	return av_codec_is_decoder((const ::AVCodec *)m_pPointer) != 0;
 }
 
 bool FFmpeg::AVCodec::IsEncoder()
 {
-	return (av_codec_is_encoder((const ::AVCodec *)m_pPointer) != 0);
+	return av_codec_is_encoder((const ::AVCodec *)m_pPointer) != 0;
 }
 
 String^ FFmpeg::AVCodec::GetProfileName(FFmpeg::Profile _profile)
@@ -411,13 +410,13 @@ FFmpeg::AVCodec^ FFmpeg::AVCodec::Next(FFmpeg::AVCodec^ _prev)
 		if (av_codec_iterate)
 		{
 			void * opaque = nullptr;
-			bool bMoveNext = (_prev != nullptr);
+			bool bMoveNext = _prev != nullptr;
 			do
 			{
 				p = av_codec_iterate(&opaque);
 				if (p && bMoveNext)
 				{
-					bMoveNext = (p != _prev->_Pointer.ToPointer());
+					bMoveNext = p != _prev->_Pointer.ToPointer();
 					continue;
 				}
 				break;
@@ -441,8 +440,7 @@ FFmpeg::AVCodec^ FFmpeg::AVCodec::FindDecoder(String^ _name)
 	if (!String::IsNullOrEmpty(_name))
 	{
 		LibAVCodec::RegisterAll();
-		char * szName = nullptr;
-		szName = (char*)AllocString(_name).ToPointer();
+		auto szName = (char*)AllocString(_name).ToPointer();
 		try
 		{
 			_pointer =  avcodec_find_decoder_by_name(szName);
@@ -468,8 +466,7 @@ FFmpeg::AVCodec^ FFmpeg::AVCodec::FindEncoder(String^ _name)
 	if (!String::IsNullOrEmpty(_name))
 	{
 		LibAVCodec::RegisterAll();
-		char * szName = nullptr;
-		szName = (char*)AllocString(_name).ToPointer();
+		auto szName = (char*)AllocString(_name).ToPointer();
 		try
 		{
 			_pointer = avcodec_find_encoder_by_name(szName);
@@ -489,7 +486,7 @@ int FFmpeg::AVCodec::GetBitsPerSample(FFmpeg::AVCodecID codec_id)
 
 FFmpeg::AVCodecID FFmpeg::AVCodec::GetPCMCodec(FFmpeg::AVSampleFormat fmt, int be)
 {
-	return (AVCodecID)av_get_pcm_codec((::AVSampleFormat)fmt, be);
+	return (AVCodecID)av_get_pcm_codec(fmt, be);
 }
 
 int FFmpeg::AVCodec::GetExactBitsPerSample(FFmpeg::AVCodecID codec_id)
@@ -525,7 +522,7 @@ String^ FFmpeg::AVCodec::GetColorTransferName(AVColorTransferCharacteristic tran
 }
 String^ FFmpeg::AVCodec::GetColorSpaceName(AVColorSpace space)
 {
-	auto p = av_color_space_name((::AVColorSpace)space);
+	auto p = av_color_space_name(space);
 	return p != nullptr ? gcnew String(p) : nullptr;
 }
 String^ FFmpeg::AVCodec::GetChromaLocationName(AVChromaLocation location)
@@ -623,7 +620,7 @@ FFmpeg::AV_PIX_FMT_FLAG FFmpeg::AVPixFmtDescriptor::flags::get()
 array<FFmpeg::AVComponentDescriptor^>^ FFmpeg::AVPixFmtDescriptor::comp::get()
 {
 	::AVComponentDescriptor * p = ((::AVPixFmtDescriptor*)m_pPointer)->comp;
-	List<FFmpeg::AVComponentDescriptor^>^ _list = gcnew List<FFmpeg::AVComponentDescriptor^>();
+	auto _list = gcnew List<FFmpeg::AVComponentDescriptor^>();
 	for (int i = 0; i < 4; i++)
 	{
 		_list->Add(_CreateObject<AVComponentDescriptor>(&p[i]));
@@ -646,12 +643,12 @@ int FFmpeg::AVPixFmtDescriptor::padded_bits_per_pixel::get()
 }
 FFmpeg::AVPixelFormat FFmpeg::AVPixFmtDescriptor::id::get()
 {
-	return (AVPixelFormat)av_pix_fmt_desc_get_id((::AVPixFmtDescriptor*)m_pPointer);
+	return av_pix_fmt_desc_get_id((::AVPixFmtDescriptor*)m_pPointer);
 }
 //////////////////////////////////////////////////////
 FFmpeg::AVPixFmtDescriptor^ FFmpeg::AVPixFmtDescriptor::pix_fmt_desc_get(AVPixelFormat pix_fmt)
 {
-	auto p = av_pix_fmt_desc_get((::AVPixelFormat)pix_fmt);
+	auto p = av_pix_fmt_desc_get(pix_fmt);
 	return p != nullptr ? gcnew FFmpeg::AVPixFmtDescriptor((void*)p,nullptr) : nullptr;
 }
 
@@ -667,40 +664,40 @@ System::Drawing::Size^ FFmpeg::AVPixel::get_chroma_sub_sample(AVPixelFormat pix_
 {
 	int h_shift = 0;
 	int v_shift = 0;
-	av_pix_fmt_get_chroma_sub_sample((::AVPixelFormat)pix_fmt,&h_shift,&v_shift);
+	av_pix_fmt_get_chroma_sub_sample(pix_fmt,&h_shift,&v_shift);
 	return gcnew System::Drawing::Size(h_shift,v_shift);
 }
 
 UInt32 FFmpeg::AVPixel::pix_fmt_to_codec_tag(AVPixelFormat pix_fmt)
 {
-	return avcodec_pix_fmt_to_codec_tag((::AVPixelFormat)pix_fmt);
+	return avcodec_pix_fmt_to_codec_tag(pix_fmt);
 }
 
 String^ FFmpeg::AVPixel::get_pix_fmt_name(AVPixelFormat pix_fmt)
 {
-	auto p = av_get_pix_fmt_name((::AVPixelFormat)pix_fmt);
+	auto p = av_get_pix_fmt_name(pix_fmt);
 	return p != nullptr ? gcnew String(p) : nullptr;
 }
 
 int FFmpeg::AVPixel::pix_fmt_count_planes(AVPixelFormat pix_fmt)
 {
-	return av_pix_fmt_count_planes((::AVPixelFormat)pix_fmt);
+	return av_pix_fmt_count_planes(pix_fmt);
 }
 
 FFmpeg::AVPixelFormat FFmpeg::AVPixel::pix_fmt_swap_endianness(AVPixelFormat pix_fmt)
 {
-	return (AVPixelFormat)av_pix_fmt_swap_endianness((::AVPixelFormat)pix_fmt);
+	return av_pix_fmt_swap_endianness(pix_fmt);
 }
 
 FFmpeg::FFLoss FFmpeg::AVPixel::get_pix_fmt_loss(AVPixelFormat dst_pix_fmt,AVPixelFormat src_pix_fmt,bool has_alpha)
 {
-	return (FFLoss)av_get_pix_fmt_loss((::AVPixelFormat)dst_pix_fmt,(::AVPixelFormat)src_pix_fmt,has_alpha ? 1 : 0);
+	return (FFLoss)av_get_pix_fmt_loss(dst_pix_fmt,src_pix_fmt,has_alpha ? 1 : 0);
 }
 
 FFmpeg::AVPixelFormat FFmpeg::AVPixel::find_best_pix_fmt_of_list(array<AVPixelFormat>^ pix_fmt_list,AVPixelFormat src_pix_fmt,bool has_alpha, FFLoss % loss_ptr)
 {
 	int loss = (int)loss_ptr;
-	::AVPixelFormat * list = (::AVPixelFormat *)av_malloc(sizeof(::AVPixelFormat) * ((pix_fmt_list != nullptr ? pix_fmt_list->Length : 0) + 1));
+	auto list = (::AVPixelFormat *)av_malloc(sizeof(::AVPixelFormat) * ((pix_fmt_list != nullptr ? pix_fmt_list->Length : 0) + 1));
 	try
 	{
 		int index = 0;
@@ -709,7 +706,7 @@ FFmpeg::AVPixelFormat FFmpeg::AVPixel::find_best_pix_fmt_of_list(array<AVPixelFo
 			while (index < pix_fmt_list->Length) { list[index] = (::AVPixelFormat)pix_fmt_list[index++]; }
 		}
 		list[index] = AV_PIX_FMT_NONE;
-		return (AVPixelFormat)avcodec_find_best_pix_fmt_of_list(list,(::AVPixelFormat)src_pix_fmt,has_alpha ? 1 : 0,&loss);
+		return avcodec_find_best_pix_fmt_of_list(list,src_pix_fmt,has_alpha ? 1 : 0,&loss);
 	}
 	finally
 	{
@@ -723,7 +720,7 @@ FFmpeg::AVPixelFormat FFmpeg::AVPixel::find_best_pix_fmt_of_2(AVPixelFormat dst_
 	int loss = (int)loss_ptr;
 	try
 	{
-		return (AVPixelFormat)av_find_best_pix_fmt_of_2((::AVPixelFormat)dst_pix_fmt1,(::AVPixelFormat)dst_pix_fmt2,(::AVPixelFormat)src_pix_fmt,has_alpha ? 1 : 0,&loss);
+		return av_find_best_pix_fmt_of_2(dst_pix_fmt1,dst_pix_fmt2,src_pix_fmt,has_alpha ? 1 : 0,&loss);
 	}
 	finally
 	{
@@ -860,7 +857,7 @@ FFmpeg::AVPicture^ FFmpeg::AVSubtitleRect::pict::get()
 FFmpeg::AVArray<IntPtr>^ FFmpeg::AVSubtitleRect::data::get()
 {
 	auto p = ((::AVSubtitleRect *)m_pPointer)->data;
-	AVArray<IntPtr>^ _array = (AVArray<IntPtr>^)GetObject((IntPtr)p);
+	auto _array = (AVArray<IntPtr>^)GetObject((IntPtr)p);
 	if (_array) return _array;
 	return gcnew AVArray<IntPtr>(p,this,4);
 }
@@ -868,7 +865,7 @@ FFmpeg::AVArray<IntPtr>^ FFmpeg::AVSubtitleRect::data::get()
 FFmpeg::AVArray<int>^ FFmpeg::AVSubtitleRect::linesize::get()
 {
 	auto p = ((::AVSubtitleRect *)m_pPointer)->linesize;
-	AVArray<int>^ _array = (AVArray<int>^)GetObject((IntPtr)p);
+	auto _array = (AVArray<int>^)GetObject((IntPtr)p);
 	if (_array) return _array;
 	return gcnew AVArray<int>(p,this,sizeof(int),4);
 }
@@ -976,7 +973,7 @@ void FFmpeg::AVSubtitle::rects::set(array<AVSubtitleRect^>^ value)
 {
 	{
 		int nCount = ((::AVSubtitle*)m_pPointer)->num_rects;
-		::AVSubtitleRect ** p = (::AVSubtitleRect **)((::AVSubtitle*)m_pPointer)->rects;
+		auto p = ((::AVSubtitle*)m_pPointer)->rects;
 		if (p)
 		{
 			while (nCount-- > 0)
@@ -990,7 +987,7 @@ void FFmpeg::AVSubtitle::rects::set(array<AVSubtitleRect^>^ value)
 	}
 	if (value != nullptr && value->Length > 0)
 	{
-		::AVSubtitleRect ** p = (::AVSubtitleRect **)AllocMemory("rects",value->Length * (sizeof(::AVSubtitleRect*))).ToPointer();
+		auto p = (::AVSubtitleRect **)AllocMemory("rects",value->Length * sizeof(::AVSubtitleRect*)).ToPointer();
 		if (p)
 		{
 			((::AVSubtitle*)m_pPointer)->rects = p;
@@ -1088,7 +1085,7 @@ bool FFmpeg::AVBufferRef::IsWritable::get()
 FFmpeg::AVRESULT FFmpeg::AVBufferRef::MakeWritable()
 {
 	int _result;
-	::AVBufferRef * _pointer = (::AVBufferRef *)m_pPointer;
+	auto _pointer = (::AVBufferRef *)m_pPointer;
 	if (0 == (_result = av_buffer_make_writable(&_pointer)))
 	{
 		m_pPointer = _pointer;
@@ -1099,7 +1096,7 @@ FFmpeg::AVRESULT FFmpeg::AVBufferRef::MakeWritable()
 FFmpeg::AVRESULT FFmpeg::AVBufferRef::Realloc(int _size)
 {
 	int _result;
-	::AVBufferRef * _pointer = (::AVBufferRef *)m_pPointer;
+	auto _pointer = (::AVBufferRef *)m_pPointer;
 	if (0 == (_result = av_buffer_realloc(&_pointer,_size)))
 	{
 		m_pPointer = _pointer;
@@ -1294,7 +1291,7 @@ void FFmpeg::AVCodecParameters::color_trc::set(FFmpeg::AVColorTransferCharacteri
 }
 FFmpeg::AVColorSpace FFmpeg::AVCodecParameters::color_space::get()
 {
-	return (AVColorSpace)((::AVCodecParameters*)m_pPointer)->color_space;
+	return ((::AVCodecParameters*)m_pPointer)->color_space;
 }
 void FFmpeg::AVCodecParameters::color_space::set(FFmpeg::AVColorSpace value)
 {
@@ -1318,7 +1315,7 @@ void FFmpeg::AVCodecParameters::video_delay::set(int value)
 }
 FFmpeg::AVChannelLayout FFmpeg::AVCodecParameters::channel_layout::get()
 {
-	return (AVChannelLayout)((::AVCodecParameters*)m_pPointer)->channel_layout;
+	return ((::AVCodecParameters*)m_pPointer)->channel_layout;
 }
 void FFmpeg::AVCodecParameters::channel_layout::set(FFmpeg::AVChannelLayout value)
 {
@@ -1384,7 +1381,7 @@ void FFmpeg::AVCodecParameters::seek_preroll::set(int value)
 FFmpeg::AVRESULT FFmpeg::AVCodecParameters::FromContext(AVCodecContext^ codec)
 {
 	return avcodec_parameters_from_context(
-		((::AVCodecParameters*)m_pPointer),(::AVCodecContext*)codec->_Pointer.ToPointer());
+		(::AVCodecParameters*)m_pPointer,(::AVCodecContext*)codec->_Pointer.ToPointer());
 }
 
 FFmpeg::AVRESULT FFmpeg::AVCodecParameters::CopyTo(AVCodecContext^ context)
@@ -1396,7 +1393,7 @@ FFmpeg::AVRESULT FFmpeg::AVCodecParameters::CopyTo(AVCodecContext^ context)
 FFmpeg::AVRESULT FFmpeg::AVCodecParameters::CopyTo(AVCodecParameters^ dst)
 {
 	return avcodec_parameters_copy(
-		(::AVCodecParameters*)dst->_Pointer.ToPointer(),((::AVCodecParameters*)m_pPointer));
+		(::AVCodecParameters*)dst->_Pointer.ToPointer(),(::AVCodecParameters*)m_pPointer);
 }
 //////////////////////////////////////////////////////
 int FFmpeg::AVCodecParameters::GetAudioFrameDuration(int frame_bytes)
@@ -1472,7 +1469,7 @@ int FFmpeg::AVPacketSideData::_StructureSize::get()
 String^ FFmpeg::AVPacketSideData::ToString()
 {
 	String^ _name = SideDataName(type);
-	return String::IsNullOrEmpty(_name) ? __super::ToString() : ("[ AVPacketSideData ] \"" + _name + "\"");
+	return String::IsNullOrEmpty(_name) ? __super::ToString() : "[ AVPacketSideData ] \"" + _name + "\"";
 }
 //////////////////////////////////////////////////////
 IntPtr FFmpeg::AVPacketSideData::data::get()
@@ -1514,7 +1511,7 @@ int FFmpeg::AVFrameSideData::_StructureSize::get()
 String^ FFmpeg::AVFrameSideData::ToString()
 {
 	String^ _name = SideDataName(type);
-	return String::IsNullOrEmpty(_name) ? __super::ToString() : ("[ AVFrameSideData ] \"" + _name + "\"");
+	return String::IsNullOrEmpty(_name) ? __super::ToString() : "[ AVFrameSideData ] \"" + _name + "\"";
 }
 //////////////////////////////////////////////////////
 IntPtr FFmpeg::AVFrameSideData::data::get()
@@ -1642,7 +1639,7 @@ FFmpeg::AVPacket::AVPacket(AVBufferRef^ buf)
 	, m_pFreeCB(nullptr)
 {
 	::AVPacket* p = av_packet_alloc();
-	::AVBufferRef* bufref = (::AVBufferRef*)buf->_Pointer.ToPointer();
+	auto bufref = (::AVBufferRef*)buf->_Pointer.ToPointer();
 	m_pFreep = (TFreeFNP*)av_packet_free;
 	m_pDescructor = (TFreeFN*)av_packet_unref;
 	av_init_packet(p);
@@ -1805,13 +1802,13 @@ FFmpeg::AVRESULT FFmpeg::AVPacket::Grow(int _size)
 }
 void FFmpeg::AVPacket::RescaleTS(FFmpeg::AVRational^ tb_src, FFmpeg::AVRational^ tb_dst)
 {
-	::AVRational * _src = (::AVRational *)tb_src->_Pointer.ToPointer();
-	::AVRational * _dst = (::AVRational *)tb_dst->_Pointer.ToPointer();
+	auto _src = (::AVRational *)tb_src->_Pointer.ToPointer();
+	auto _dst = (::AVRational *)tb_dst->_Pointer.ToPointer();
 	av_packet_rescale_ts((::AVPacket *)m_pPointer,*_src,*_dst);
 }
 bool FFmpeg::AVPacket::CopyProps(FFmpeg::AVPacket^ _dest)
 {
-	return (0 == av_packet_copy_props((::AVPacket *)_dest->m_pPointer,(::AVPacket *)m_pPointer));
+	return 0 == av_packet_copy_props((::AVPacket *)_dest->m_pPointer,(::AVPacket *)m_pPointer);
 }
 bool FFmpeg::AVPacket::CopySideData(FFmpeg::AVPacket^ _dest)
 {
@@ -1867,7 +1864,7 @@ IntPtr FFmpeg::AVPacket::GetSideDataPtr(AVPacketSideDataType _type, Int64 % _siz
 
 bool FFmpeg::AVPacket::AddSideData(AVPacketSideDataType _type, IntPtr data, int _size)
 {
-	uint8_t * p = (uint8_t *)av_malloc(_size);
+	auto p = (uint8_t *)av_malloc(_size);
 	memcpy(p,data.ToPointer(),_size);
 	if (0 != av_packet_add_side_data((::AVPacket *)m_pPointer,(::AVPacketSideDataType)_type,p,_size))
 	{
@@ -1880,8 +1877,8 @@ bool FFmpeg::AVPacket::AddSideData(AVPacketSideDataType _type, IntPtr data, int 
 bool FFmpeg::AVPacket::AddSideData(AVPacketSideDataType _type, array<byte>^ data)
 {
 	pin_ptr<byte> _data = &data[0];
-	uint8_t * pData = (uint8_t *)_data;
-	uint8_t * p = (uint8_t *)av_malloc(data->Length);
+	auto pData = (uint8_t *)_data;
+	auto p = (uint8_t *)av_malloc(data->Length);
 	memcpy(p,_data,data->Length);
 	if (0 != av_packet_add_side_data((::AVPacket *)m_pPointer,(::AVPacketSideDataType)_type,p,data->Length))
 	{
@@ -1893,7 +1890,7 @@ bool FFmpeg::AVPacket::AddSideData(AVPacketSideDataType _type, array<byte>^ data
 
 bool FFmpeg::AVPacket::ShrinkSideData(FFmpeg::AVPacketSideDataType _type, int _size)
 {
-	return (0 == av_packet_shrink_side_data((::AVPacket *)m_pPointer,(::AVPacketSideDataType)_type,_size));
+	return 0 == av_packet_shrink_side_data((::AVPacket *)m_pPointer,(::AVPacketSideDataType)_type,_size);
 }
 FFmpeg::AVPacketSideData^ FFmpeg::AVPacket::GetSideData(FFmpeg::AVPacketSideDataType _type)
 {
@@ -1920,18 +1917,18 @@ FFmpeg::AVPacketSideData^ FFmpeg::AVPacket::GetSideData(FFmpeg::AVPacketSideData
 //////////////////////////////////////////////////////
 bool FFmpeg::AVPacket::MakeWritable()
 {
-	return (0 == av_packet_make_writable((::AVPacket*)m_pPointer));
+	return 0 == av_packet_make_writable((::AVPacket*)m_pPointer);
 }
 //////////////////////////////////////////////////////
 bool FFmpeg::AVPacket::MergeSideData()
 {
 	DYNAMIC_DEF_API(AVCodec,int,true,av_packet_merge_side_data,::AVPacket *);
-	return (0 == av_packet_merge_side_data((::AVPacket *)m_pPointer));
+	return 0 == av_packet_merge_side_data((::AVPacket *)m_pPointer);
 }
 bool FFmpeg::AVPacket::SplitSideData()
 {
 	DYNAMIC_DEF_API(AVCodec,int,true,av_packet_split_side_data,::AVPacket *);
-	return (0 == av_packet_split_side_data((::AVPacket *)m_pPointer));
+	return 0 == av_packet_split_side_data((::AVPacket *)m_pPointer);
 }
 //////////////////////////////////////////////////////
 bool FFmpeg::AVPacket::Dump(String^ sFileName)
@@ -1941,7 +1938,7 @@ bool FFmpeg::AVPacket::Dump(String^ sFileName)
 bool FFmpeg::AVPacket::Dump(String^ sFileName,bool bAppend)
 {
 	bool _result = false;
-	wchar_t * path = (wchar_t *)AllocString(sFileName,true).ToPointer();
+	auto path = (wchar_t *)AllocString(sFileName,true).ToPointer();
 	try
 	{
 		HANDLE hFile = CreateFileW(path, FILE_GENERIC_WRITE,FILE_SHARE_READ,NULL,bAppend ? OPEN_ALWAYS : CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
@@ -1949,7 +1946,7 @@ bool FFmpeg::AVPacket::Dump(String^ sFileName,bool bAppend)
 		{
 			SetFilePointer(hFile,0,NULL,FILE_END);
 			DWORD dwResult;
-			_result = (WriteFile(hFile,((::AVPacket*)m_pPointer)->data,((::AVPacket*)m_pPointer)->size,&dwResult,NULL) == TRUE);
+			_result = WriteFile(hFile,((::AVPacket*)m_pPointer)->data,((::AVPacket*)m_pPointer)->size,&dwResult,NULL) == TRUE;
 			CloseHandle(hFile);
 		}
 	}
@@ -1973,8 +1970,8 @@ bool FFmpeg::AVPacket::Dump(Stream^ _stream)
 
 array<byte>^ FFmpeg::AVPacket::ToArray()
 {
-	::AVPacket* _packet = ((::AVPacket*)m_pPointer);
-	array<byte>^ _array = gcnew array<byte>(_packet->size);
+	auto _packet = (::AVPacket*)m_pPointer;
+	auto _array = gcnew array<byte>(_packet->size);
 	if (_packet->size > 0 && _packet->data != nullptr)
 	{
 		Marshal::Copy((IntPtr)_packet->data,_array,0,_packet->size);
@@ -1984,55 +1981,55 @@ array<byte>^ FFmpeg::AVPacket::ToArray()
 
 FFmpeg::AVPacket^ FFmpeg::AVPacket::FromArray(array<byte>^ _data)
 {
-	AVPacket^ _packet = gcnew AVPacket(_data->Length);
+	auto _packet = gcnew AVPacket(_data->Length);
 	Marshal::Copy(_data,0,(IntPtr)((::AVPacket*)_packet->m_pPointer)->data,_data->Length);
 	return _packet;
 }
 FFmpeg::AVPacket^ FFmpeg::AVPacket::FromArray(array<int>^ _data)
 {
-	AVPacket^ _packet = gcnew AVPacket(_data->Length * sizeof(int));
+	auto _packet = gcnew AVPacket(_data->Length * sizeof(int));
 	Marshal::Copy(_data,0,(IntPtr)((::AVPacket*)_packet->m_pPointer)->data,_data->Length);
 	return _packet;
 }
 FFmpeg::AVPacket^ FFmpeg::AVPacket::FromArray(array<unsigned int>^ _data)
 {
-	AVPacket^ _packet = gcnew AVPacket(_data->Length * sizeof(unsigned int));
+	auto _packet = gcnew AVPacket(_data->Length * sizeof(unsigned int));
 	pin_ptr<unsigned int> data = &_data[0];
-	unsigned int * pData = (unsigned int *)data;
+	auto pData = (unsigned int *)data;
 	memcpy(((::AVPacket*)_packet->m_pPointer)->data,pData,_data->Length * sizeof(unsigned int));
 	return _packet;
 }
 
 FFmpeg::AVPacket^ FFmpeg::AVPacket::FromArray(array<unsigned short>^ _data)
 {
-	AVPacket^ _packet = gcnew AVPacket(_data->Length * sizeof(unsigned short));
+	auto _packet = gcnew AVPacket(_data->Length * sizeof(unsigned short));
 	pin_ptr<unsigned short> data = &_data[0];
-	short int * pData = (short int *)data;
+	auto pData = (short int *)data;
 	memcpy(((::AVPacket*)_packet->m_pPointer)->data,pData,_data->Length * sizeof(short int));
 	return _packet;
 }
 
 FFmpeg::AVPacket^ FFmpeg::AVPacket::FromArray(array<Int64>^ _data)
 {
-	AVPacket^ _packet = gcnew AVPacket(_data->Length * sizeof(Int64));
+	auto _packet = gcnew AVPacket(_data->Length * sizeof(Int64));
 	Marshal::Copy(_data,0,(IntPtr)((::AVPacket*)_packet->m_pPointer)->data,_data->Length);
 	return _packet;
 }
 FFmpeg::AVPacket^ FFmpeg::AVPacket::FromArray(array<short>^ _data)
 {
-	AVPacket^ _packet = gcnew AVPacket(_data->Length * sizeof(short));
+	auto _packet = gcnew AVPacket(_data->Length * sizeof(short));
 	Marshal::Copy(_data,0,(IntPtr)((::AVPacket*)_packet->m_pPointer)->data,_data->Length);
 	return _packet;
 }
 FFmpeg::AVPacket^ FFmpeg::AVPacket::FromArray(array<float>^ _data)
 {
-	AVPacket^ _packet = gcnew AVPacket(_data->Length * sizeof(float));
+	auto _packet = gcnew AVPacket(_data->Length * sizeof(float));
 	Marshal::Copy(_data,0,(IntPtr)((::AVPacket*)_packet->m_pPointer)->data,_data->Length);
 	return _packet;
 }
 FFmpeg::AVPacket^ FFmpeg::AVPacket::FromArray(array<double>^ _data)
 {
-	AVPacket^ _packet = gcnew AVPacket(_data->Length * sizeof(double));
+	auto _packet = gcnew AVPacket(_data->Length * sizeof(double));
 	Marshal::Copy(_data,0,(IntPtr)((::AVPacket*)_packet->m_pPointer)->data,_data->Length);
 	return _packet;
 }
@@ -2057,8 +2054,8 @@ int AVPicture_GetDataLinesize(void * p, void * opaque)
 		GCHandle _handle = GCHandle::FromIntPtr((IntPtr)opaque);
 		if (_handle.IsAllocated)
 		{
-			FFmpeg::AVPicture^ target = ((FFmpeg::AVPicture^)_handle.Target);
-			::AVPicture * picture = (::AVPicture *)target->_Pointer.ToPointer();
+			auto target = (FFmpeg::AVPicture^)_handle.Target;
+			auto picture = (::AVPicture *)target->_Pointer.ToPointer();
 			int height = target->height; 
 			if (height == 0) height = 1;
 			if (height < 0) height *= -1;
@@ -2066,7 +2063,7 @@ int AVPicture_GetDataLinesize(void * p, void * opaque)
 			{
 				if (picture->data[i] == p)
 				{
-					return (picture->linesize[i] * height);
+					return picture->linesize[i] * height;
 				}
 			}
 		}
@@ -2154,7 +2151,7 @@ int FFmpeg::AVPicture::_StructureSize::get()
 FFmpeg::AVArray<FFmpeg::AVMemPtr^>^ FFmpeg::AVPicture::data::get()
 {
 	auto p = ((::AVPicture *)m_pPointer)->data;
-	AVArray<AVMemPtr^>^ _array = (AVArray<AVMemPtr^>^)GetObject((IntPtr)p);
+	auto _array = (AVArray<AVMemPtr^>^)GetObject((IntPtr)p);
 	if (_array) return _array;
 
 	IntPtr _this = GCHandle::ToIntPtr(GCHandle::Alloc(this,GCHandleType::Weak));
@@ -2165,7 +2162,7 @@ FFmpeg::AVArray<FFmpeg::AVMemPtr^>^ FFmpeg::AVPicture::data::get()
 FFmpeg::AVArray<int>^ FFmpeg::AVPicture::linesize::get()
 {
 	auto p = ((::AVPicture *)m_pPointer)->linesize;
-	AVArray<int>^ _array = (AVArray<int>^)GetObject((IntPtr)p);
+	auto _array = (AVArray<int>^)GetObject((IntPtr)p);
 	if (_array) return _array;
 	return gcnew AVArray<int>(((::AVPicture *)m_pPointer)->linesize,this,sizeof(int),m_nNumDataPointers);
 }
@@ -2204,7 +2201,7 @@ int FFmpeg::AVPicture::Alloc(FFmpeg::AVPixelFormat pix_fmt, int width, int heigh
 int FFmpeg::AVPicture::Alloc(AVPixelFormat pix_fmt, int width, int height,int align)
 {
 	Free();
-	m_nDataAllocated = av_image_alloc(((::AVPicture *)m_pPointer)->data,((::AVPicture *)m_pPointer)->linesize,width, height,(::AVPixelFormat)pix_fmt,align);
+	m_nDataAllocated = av_image_alloc(((::AVPicture *)m_pPointer)->data,((::AVPicture *)m_pPointer)->linesize,width, height,pix_fmt,align);
 	if (m_nDataAllocated >= 0)
 	{
 		m_nWidth = width;
@@ -2225,7 +2222,7 @@ void FFmpeg::AVPicture::Free()
 		}
 		else
 		{
-			::AVPicture * picture = (::AVPicture *)m_pPointer;
+			auto picture = (::AVPicture *)m_pPointer;
 			av_freep(&picture->data[0]);
 		}
 	}
@@ -2235,8 +2232,8 @@ void FFmpeg::AVPicture::Free()
 int FFmpeg::AVPicture::Fill(IntPtr ptr,FFmpeg::AVPixelFormat pix_fmt, int width, int height)
 {
 	Free();
-	::AVPicture * p = (::AVPicture *)m_pPointer;
-	int result = av_image_fill_arrays(p->data,p->linesize,(const uint8_t *)ptr.ToPointer(),(::AVPixelFormat)pix_fmt, width, height,1);
+	auto p = (::AVPicture *)m_pPointer;
+	int result = av_image_fill_arrays(p->data,p->linesize,(const uint8_t *)ptr.ToPointer(),pix_fmt, width, height,1);
 	if (result >= 0)
 	{
 		m_nWidth = width;
@@ -2248,11 +2245,11 @@ int FFmpeg::AVPicture::Fill(IntPtr ptr,FFmpeg::AVPixelFormat pix_fmt, int width,
 
 int FFmpeg::AVPicture::Layout(FFmpeg::AVPixelFormat pix_fmt,int width, int height,IntPtr dest, int dest_size)
 {
-	::AVPicture * p = (::AVPicture *)m_pPointer;
+	auto p = (::AVPicture *)m_pPointer;
 	return av_image_copy_to_buffer(
 		(unsigned char *)dest.ToPointer(), dest_size,
-		(const uint8_t * const*)p->data, p->linesize,
-		(::AVPixelFormat)pix_fmt, width, height, 1);
+		p->data, p->linesize,
+		pix_fmt, width, height, 1);
 }
 
 void FFmpeg::AVPicture::CopyTo(FFmpeg::AVPicture^ dst,FFmpeg::AVPixelFormat pix_fmt, int width, int height)
@@ -2260,12 +2257,12 @@ void FFmpeg::AVPicture::CopyTo(FFmpeg::AVPicture^ dst,FFmpeg::AVPixelFormat pix_
 	auto _src = (::AVPicture*)m_pPointer;
 	auto _dst = (::AVPicture*)dst->m_pPointer;
 	av_image_copy(_dst->data, _dst->linesize, (const uint8_t **)_src->data,
-		_src->linesize, (::AVPixelFormat)pix_fmt, width, height);
+		_src->linesize, pix_fmt, width, height);
 }
 
 int FFmpeg::AVPicture::CopyTo(IntPtr dst,int dst_size,AVPixelFormat pix_fmt, int width, int height, int align)
 {
-	return av_image_copy_to_buffer((uint8_t *)dst.ToPointer(),dst_size,((::AVPicture*)m_pPointer)->data, ((::AVPicture*)m_pPointer)->linesize,(::AVPixelFormat)pix_fmt,width,height,align);
+	return av_image_copy_to_buffer((uint8_t *)dst.ToPointer(),dst_size,((::AVPicture*)m_pPointer)->data, ((::AVPicture*)m_pPointer)->linesize,pix_fmt,width,height,align);
 }
 
 FFmpeg::AVRESULT FFmpeg::AVPicture::Crop(FFmpeg::AVPicture^ dst,FFmpeg::AVPixelFormat pix_fmt, int top_band, int left_band)
@@ -2294,7 +2291,7 @@ int FFmpeg::AVPicture::GetSize(FFmpeg::AVPixelFormat pix_fmt, int width, int hei
 }
 int FFmpeg::AVPicture::GetSize(AVPixelFormat pix_fmt, int width, int height,int align)
 {
-	return av_image_get_buffer_size((::AVPixelFormat)pix_fmt, width, height,align);
+	return av_image_get_buffer_size(pix_fmt, width, height,align);
 }
 void FFmpeg::AVPicture::FillMaxPixsteps(array<int>^ max_pixsteps,array<int>^ max_pixstep_comps,AVPixFmtDescriptor^ pixdesc)
 {
@@ -2302,45 +2299,45 @@ void FFmpeg::AVPicture::FillMaxPixsteps(array<int>^ max_pixsteps,array<int>^ max
 	if (max_pixstep_comps->Length < 4) throw gcnew System::ArgumentException("max_pixstep_comps");
 	pin_ptr<int> p_max_pixsteps = &max_pixsteps[0];
 	pin_ptr<int> p_max_pixstep_comps = &max_pixstep_comps[0];
-	int * pn_max_pixsteps = (int *)p_max_pixsteps;
-	int * pn_max_pixstep_comps = (int *)p_max_pixstep_comps;
+	auto pn_max_pixsteps = (int *)p_max_pixsteps;
+	auto pn_max_pixstep_comps = (int *)p_max_pixstep_comps;
 	::AVPixFmtDescriptor * p = pixdesc != nullptr ? (::AVPixFmtDescriptor *)pixdesc->_Pointer.ToPointer() : nullptr;
-	av_image_fill_max_pixsteps((int *)pn_max_pixsteps,(int *)pn_max_pixstep_comps,p);
+	av_image_fill_max_pixsteps(pn_max_pixsteps,pn_max_pixstep_comps,p);
 }
 int FFmpeg::AVPicture::GetLinesize(AVPixelFormat pix_fmt, int width, int plane)
 {
-	return av_image_get_linesize((::AVPixelFormat)pix_fmt,width,plane);
+	return av_image_get_linesize(pix_fmt,width,plane);
 }
 int FFmpeg::AVPicture::FillLinesizes(array<int>^ linesizes, AVPixelFormat pix_fmt, int width)
 {
 	if (linesizes->Length < 4) throw gcnew System::ArgumentException("linesizes");
 	pin_ptr<int> p = &linesizes[0];
-	int * pa = (int *)p;
-	return av_image_fill_linesizes(pa,(::AVPixelFormat)pix_fmt,width);
+	auto pa = (int *)p;
+	return av_image_fill_linesizes(pa,pix_fmt,width);
 }
 int FFmpeg::AVPicture::FillLinesizes(AVArray<int>^ linesizes, AVPixelFormat pix_fmt, int width)
 {
 	if (linesizes->Count < 4) throw gcnew System::ArgumentException("linesizes");
-	int * pa = (int *)linesizes->_Pointer.ToPointer();
-	return av_image_fill_linesizes(pa, (::AVPixelFormat)pix_fmt, width);
+	auto pa = (int *)linesizes->_Pointer.ToPointer();
+	return av_image_fill_linesizes(pa, pix_fmt, width);
 }
 int FFmpeg::AVPicture::FillPointers(AVArray<IntPtr>^ pointers, AVPixelFormat pix_fmt, int height, IntPtr ptr, AVArray<int>^ linesizes)
 {
 	if (pointers->Count < 4) throw gcnew System::ArgumentException("pointers");
 	if (linesizes->Count < 4) throw gcnew System::ArgumentException("linesizes");
-	int * pa = (int *)linesizes->_Pointer.ToPointer();
-	uint8_t * ppa = (uint8_t *)pointers->_Pointer.ToPointer();
-	return av_image_fill_pointers(&ppa, (::AVPixelFormat)pix_fmt, height, (uint8_t *)ptr.ToPointer(), pa);
+	auto pa = (int *)linesizes->_Pointer.ToPointer();
+	auto ppa = (uint8_t *)pointers->_Pointer.ToPointer();
+	return av_image_fill_pointers(&ppa, pix_fmt, height, (uint8_t *)ptr.ToPointer(), pa);
 }
 int FFmpeg::AVPicture::FillPointers(array<IntPtr>^ pointers, AVPixelFormat pix_fmt, int height,IntPtr ptr,array<int>^ linesizes)
 {
 	if (pointers->Length < 4) throw gcnew System::ArgumentException("pointers");
 	if (linesizes->Length < 4) throw gcnew System::ArgumentException("linesizes");
 	pin_ptr<int> p = &linesizes[0];
-	int * pa = (int *)p;
+	auto pa = (int *)p;
 	pin_ptr<IntPtr> pp = &pointers[0];
-	uint8_t * ppa = (uint8_t *)pp;
-	return av_image_fill_pointers(&ppa, (::AVPixelFormat)pix_fmt,height,(uint8_t *)ptr.ToPointer(),pa);
+	auto ppa = (uint8_t *)pp;
+	return av_image_fill_pointers(&ppa, pix_fmt,height,(uint8_t *)ptr.ToPointer(),pa);
 }
 bool FFmpeg::AVPicture::CheckSize(UInt32 w, UInt32 h)
 {
@@ -2348,7 +2345,7 @@ bool FFmpeg::AVPicture::CheckSize(UInt32 w, UInt32 h)
 }
 bool FFmpeg::AVPicture::CheckSAR(UInt32 w, UInt32 h, AVRational^ sar)
 {
-	return 0 == av_image_check_sar(w,h,*((::AVRational*)sar->_Pointer.ToPointer()));
+	return 0 == av_image_check_sar(w,h,*(::AVRational*)sar->_Pointer.ToPointer());
 }
 void FFmpeg::AVPicture::CopyPlane(IntPtr dst, int dst_linesize,IntPtr src, int src_linesize,int bytewidth, int height)
 {
@@ -2529,7 +2526,7 @@ void FFmpeg::AVFrame::pict_type::set(AVPictureType value)
 
 FFmpeg::AVRational^ FFmpeg::AVFrame::sample_aspect_ratio::get()
 {
-	return _CreateObject<AVRational>((void*)&((::AVFrame*)m_pPointer)->sample_aspect_ratio);
+	return _CreateObject<AVRational>(&((::AVFrame*)m_pPointer)->sample_aspect_ratio);
 }
 void FFmpeg::AVFrame::sample_aspect_ratio::set(AVRational^ value)
 {
@@ -2613,7 +2610,7 @@ FFmpeg::AVArray<UInt64>^ FFmpeg::AVFrame::error::get()
 {
 #if FF_API_ERROR_FRAME
 	auto p = ((::AVFrame *)m_pPointer)->error;
-	AVArray<UInt64>^ _array = (AVArray<UInt64>^)GetObject((IntPtr)p);
+	auto _array = (AVArray<UInt64>^)GetObject((IntPtr)p);
 	if (_array) return _array;
 	return gcnew FFmpeg::AVArray<UInt64>(((::AVFrame*)m_pPointer)->error,this,sizeof(UInt64),AV_NUM_DATA_POINTERS);
 #else
@@ -2687,7 +2684,7 @@ void FFmpeg::AVFrame::sample_rate::set(int value)
 FFmpeg::AVChannelLayout FFmpeg::AVFrame::channel_layout::get()
 {
 	DYNAMIC_DEF_API(AVUtil,UInt64,((::AVFrame*)m_pPointer)->channel_layout,av_frame_get_channel_layout,::AVFrame *);
-	return (FFmpeg::AVChannelLayout)av_frame_get_channel_layout((::AVFrame*)m_pPointer);
+	return av_frame_get_channel_layout((::AVFrame*)m_pPointer);
 }
 void FFmpeg::AVFrame::channel_layout::set(AVChannelLayout value)
 {
@@ -2725,7 +2722,7 @@ array<FFmpeg::AVBufferRef^>^ FFmpeg::AVFrame::extended_buf::get()
 
 void FFmpeg::AVFrame::extended_buf::set(array<AVBufferRef^>^ value)
 {
-	::AVFrame* _frame = (::AVFrame*)m_pPointer;
+	auto _frame = (::AVFrame*)m_pPointer;
 	int nCount = _frame->nb_extended_buf;
 	if (_frame->extended_buf)
 	{
@@ -2741,7 +2738,7 @@ void FFmpeg::AVFrame::extended_buf::set(array<AVBufferRef^>^ value)
 	if (value != nullptr && value->Length > 0)
 	{
 		_frame->nb_extended_buf = value->Length;
-		_frame->extended_buf = (::AVBufferRef **)av_mallocz_array(_frame->nb_extended_buf,sizeof(*_frame->extended_buf));
+		_frame->extended_buf = (::AVBufferRef **)av_mallocz_array(_frame->nb_extended_buf,sizeof*_frame->extended_buf);
 		for (int i = 0; i < _frame->nb_extended_buf;i++)
 		{
 			_frame->extended_buf[i] = (::AVBufferRef *)value[i]->_Pointer.ToPointer();
@@ -2818,8 +2815,8 @@ void FFmpeg::AVFrame::color_trc::set(AVColorTransferCharacteristic value)
 
 FFmpeg::AVColorSpace FFmpeg::AVFrame::colorspace::get()
 {
-	DYNAMIC_DEF_API(AVUtil,::AVColorSpace ,(FFmpeg::AVColorSpace)((::AVFrame*)m_pPointer)->colorspace,av_frame_get_colorspace,::AVFrame *);
-	return (FFmpeg::AVColorSpace)av_frame_get_colorspace((::AVFrame*)m_pPointer);
+	DYNAMIC_DEF_API(AVUtil,::AVColorSpace ,((::AVFrame*)m_pPointer)->colorspace,av_frame_get_colorspace,::AVFrame *);
+	return av_frame_get_colorspace((::AVFrame*)m_pPointer);
 }
 void FFmpeg::AVFrame::colorspace::set(AVColorSpace value)
 {
@@ -3067,7 +3064,7 @@ FFmpeg::AVRESULT FFmpeg::AVFrame::Copy(AVFrame^ dst)
 
 void FFmpeg::AVFrame::CopyTo(AVPicture^ dst)
 {
-	AVPicture::CopyTo(dst,(AVPixelFormat)format,width,height);
+	AVPicture::CopyTo(dst,format,width,height);
 }
 
 FFmpeg::AVRESULT FFmpeg::AVFrame::CopyProps(AVFrame^ dst)
@@ -3101,7 +3098,7 @@ void FFmpeg::AVFrame::RemoveSideData(AVFrameSideDataType type)
 int FFmpeg::AVFrame::FillAudio(int nb_channels,AVSampleFormat sample_fmt,IntPtr buf,int buf_size, int align)
 {
 	return avcodec_fill_audio_frame((::AVFrame*)m_pPointer,nb_channels,
-		(::AVSampleFormat)sample_fmt,(const uint8_t *)buf.ToPointer(),buf_size, align);
+		sample_fmt,(const uint8_t *)buf.ToPointer(),buf_size, align);
 }
 //////////////////////////////////////////////////////
 void FFmpeg::AVFrame::Free()
@@ -3114,7 +3111,7 @@ void FFmpeg::AVFrame::Free()
 // ICloneable
 Object^ FFmpeg::AVFrame::Clone()
 {
-	AVFrame^ _frame = gcnew AVFrame();
+	auto _frame = gcnew AVFrame();
 	av_frame_ref((::AVFrame*)_frame->m_pPointer,(::AVFrame*)m_pPointer);
 	_frame->m_pDescructor = (TFreeFN *)av_frame_unref;
 	return _frame;
@@ -3127,7 +3124,7 @@ System::Drawing::Bitmap^ FFmpeg::AVFrame::ToBitmap()
 //////////////////////////////////////////////////////
 String^ FFmpeg::AVFrame::GetColorspaceName(AVColorSpace val)
 {
-	auto p = av_get_colorspace_name((::AVColorSpace)val);
+	auto p = av_get_colorspace_name(val);
 	return p != nullptr ? gcnew String(p) : nullptr;
 }
 //////////////////////////////////////////////////////
@@ -3150,9 +3147,9 @@ FFmpeg::AVFrame^ FFmpeg::AVFrame::FromImage(System::Drawing::Bitmap^ _image, boo
 FFmpeg::AVFrame^ FFmpeg::AVFrame::FromImage(System::Drawing::Bitmap^ _image,AVPixelFormat _format, bool bDeleteBitmap)
 {
 	if (_image == nullptr) return nullptr;
-	AVFrame^ frame = gcnew AVFrame();
-	AVImage ^ image = gcnew AVImage(_image,frame, bDeleteBitmap);
-	::AVFrame * _frame = (::AVFrame *)frame->m_pPointer;
+	auto frame = gcnew AVFrame();
+	auto image = gcnew AVImage(_image,frame, bDeleteBitmap);
+	auto _frame = (::AVFrame *)frame->m_pPointer;
 	_frame->linesize[0] = image->data->Stride;
 	_frame->data[0] = (uint8_t *)image->data->Scan0.ToPointer();
 	_frame->width = image->data->Width;
@@ -3184,7 +3181,7 @@ FFmpeg::AVFrame^ FFmpeg::AVFrame::ConvertVideoFrame(AVFrame^ _source,AVPixelForm
 		return (FFmpeg::AVFrame^)_source->Clone();
 	}
 	AVFrame^ _dest = nullptr;
-	::AVFrame* _frame = ((::AVFrame*)_source->_Pointer.ToPointer());
+	auto _frame = (::AVFrame*)_source->_Pointer.ToPointer();
 	if (_frame->width > 0 && _frame->height > 0 && _frame->data[0] != nullptr && _frame->linesize[0] != 0)
 	{
 		_dest = gcnew AVFrame();
@@ -3193,10 +3190,10 @@ FFmpeg::AVFrame^ FFmpeg::AVFrame::ConvertVideoFrame(AVFrame^ _source,AVPixelForm
 		_dest->format = (int)_format;
 		_dest->width = _frame->width;
 		_dest->height = _frame->height;
-		SwsContext * _context = sws_getContext(_frame->width,_frame->height,(::AVPixelFormat)_frame->format,_frame->width,_frame->height,(::AVPixelFormat)_format,SWS_POINT,nullptr,nullptr,nullptr);
+		SwsContext * _context = sws_getContext(_frame->width,_frame->height,(::AVPixelFormat)_frame->format,_frame->width,_frame->height,_format,SWS_POINT,nullptr,nullptr,nullptr);
 		try
 		{
-			::AVFrame* _dst_frame = ((::AVFrame*)_dest->_Pointer.ToPointer());
+			auto _dst_frame = (::AVFrame*)_dest->_Pointer.ToPointer();
 			sws_scale(_context,_frame->data,_frame->linesize, 0, _dst_frame->height,_dst_frame->data,_dst_frame->linesize);
 		}
 		finally
@@ -3215,7 +3212,7 @@ System::Drawing::Bitmap^ FFmpeg::AVFrame::ToBitmap(AVFrame^ _frame)
 		System::Drawing::Bitmap^ _image = nullptr;
 		try
 		{
-			::AVFrame* _source = ((::AVFrame*)_target->_Pointer.ToPointer());
+			auto _source = (::AVFrame*)_target->_Pointer.ToPointer();
 			if (_source->width > 0 && _source->height > 0 && _source->data[0] != nullptr && _source->linesize[0] != 0)
 			{
 				_image = gcnew System::Drawing::Bitmap(_source->width,_source->height,_source->linesize[0],
@@ -3254,7 +3251,7 @@ FFmpeg::AVCodecHWConfig::AVCodecHWConfig(void * _pointer,AVBase^ _parent)
 //////////////////////////////////////////////////////
 FFmpeg::AVPixelFormat FFmpeg::AVCodecHWConfig::pix_fmt::get()
 {
-	return (AVPixelFormat)((::AVCodecHWConfig*)m_pPointer)->pix_fmt;
+	return ((::AVCodecHWConfig*)m_pPointer)->pix_fmt;
 }
 FFmpeg::AV_CODEC_HW_CONFIG_METHOD FFmpeg::AVCodecHWConfig::methods::get()
 {
@@ -3289,7 +3286,7 @@ FFmpeg::AVCodecID FFmpeg::AVHWAccel::id::get()
 }
 FFmpeg::AVPixelFormat FFmpeg::AVHWAccel::pix_fmt::get()
 {
-	return (AVPixelFormat)((::AVHWAccel*)m_pPointer)->type;
+	return ((::AVHWAccel*)m_pPointer)->type;
 }
 FFmpeg::AV_HWACCEL_CODEC_CAP FFmpeg::AVHWAccel::capabilities::get()
 {
@@ -3347,7 +3344,7 @@ int avcodec_handler_get_buffer2(::AVCodecContext *s, ::AVFrame *frame, int flags
 		GCHandle _handle = GCHandle::FromIntPtr((IntPtr)s->opaque);
 		if (_handle.IsAllocated)
 		{
-			List<FFmpeg::AVPixelFormat>^ list = gcnew List<FFmpeg::AVPixelFormat>();
+			auto list = gcnew List<FFmpeg::AVPixelFormat>();
 			if (fmt)
 			{
 				int idx = 0;
@@ -3369,7 +3366,7 @@ void avcodec_handler_draw_horiz_band(::AVCodecContext *s,
 		GCHandle _handle = GCHandle::FromIntPtr((IntPtr)s->opaque);
 		if (_handle.IsAllocated)
 		{
-			array<int>^ _offset = gcnew array<int>(AV_NUM_DATA_POINTERS);
+			auto _offset = gcnew array<int>(AV_NUM_DATA_POINTERS);
 			for (int i = 0; i < AV_NUM_DATA_POINTERS; i++) _offset[i] = offset[i];
 			FFmpeg::AVFrame^ p = src != nullptr ? gcnew FFmpeg::AVFrame((void*)src,nullptr) : nullptr;
 			((FFmpeg::AVCodecContext^)_handle.Target)->DrawHorizBand(p,_offset,y,type,height);
@@ -3463,7 +3460,7 @@ FFmpeg::AVCodec^ FFmpeg::AVCodecContext::codec::get()
 }
 void FFmpeg::AVCodecContext::codec::set(AVCodec^ value)
 {
-	AddObject((IntPtr)((void*)((::AVCodecContext*)m_pPointer)->codec),value);
+	AddObject((IntPtr)(void*)((::AVCodecContext*)m_pPointer)->codec,value);
 	((::AVCodecContext*)m_pPointer)->codec = (::AVCodec*)(value != nullptr ? value->_Pointer.ToPointer() : nullptr);
 }
 
@@ -3588,7 +3585,7 @@ array<byte>^ FFmpeg::AVCodecContext::extra_data::get()
 {
 	List<byte>^ _array = nullptr;
 	int nCount = ((::AVCodecContext*)m_pPointer)->extradata_size;
-	uint8_t * p = (uint8_t *)((::AVCodecContext*)m_pPointer)->extradata;
+	auto p = ((::AVCodecContext*)m_pPointer)->extradata;
 	if (p && nCount > 0)
 	{
 		_array =  gcnew List<byte>();
@@ -3605,7 +3602,7 @@ void FFmpeg::AVCodecContext::extra_data::set(array<byte>^ value)
 	{
 		((::AVCodecContext*)m_pPointer)->extradata_size = value->Length;
 		((::AVCodecContext*)m_pPointer)->extradata = (uint8_t *)AllocMemory("extra_data",((::AVCodecContext*)m_pPointer)->extradata_size).ToPointer();
-		Marshal::Copy(value,0,(IntPtr)((::AVCodecContext*)m_pPointer)->extradata,(int)((::AVCodecContext*)m_pPointer)->extradata_size);
+		Marshal::Copy(value,0,(IntPtr)((::AVCodecContext*)m_pPointer)->extradata,((::AVCodecContext*)m_pPointer)->extradata_size);
 	}
 	else
 	{
@@ -3617,7 +3614,7 @@ void FFmpeg::AVCodecContext::extra_data::set(array<byte>^ value)
 
 FFmpeg::AVRational^ FFmpeg::AVCodecContext::time_base::get()
 {
-	return _CreateObject<AVRational>((void*)&((::AVCodecContext*)m_pPointer)->time_base);
+	return _CreateObject<AVRational>(&((::AVCodecContext*)m_pPointer)->time_base);
 }
 void FFmpeg::AVCodecContext::time_base::set(AVRational^ value)
 {
@@ -3680,7 +3677,7 @@ void FFmpeg::AVCodecContext::gop_size::set(int value)
 
 FFmpeg::AVPixelFormat FFmpeg::AVCodecContext::pix_fmt::get()
 {
-	return (AVPixelFormat)((::AVCodecContext*)m_pPointer)->pix_fmt;
+	return ((::AVCodecContext*)m_pPointer)->pix_fmt;
 }
 void FFmpeg::AVCodecContext::pix_fmt::set(AVPixelFormat value)
 {
@@ -3975,7 +3972,7 @@ void FFmpeg::AVCodecContext::slice_offset::set(IntPtr value)
 
 FFmpeg::AVRational^ FFmpeg::AVCodecContext::sample_aspect_ratio::get()
 {
-	return _CreateObject<AVRational>((void*)&((::AVCodecContext*)m_pPointer)->sample_aspect_ratio);
+	return _CreateObject<AVRational>(&((::AVCodecContext*)m_pPointer)->sample_aspect_ratio);
 }
 
 void FFmpeg::AVCodecContext::sample_aspect_ratio::set(AVRational^ value)
@@ -4051,10 +4048,10 @@ int FFmpeg::AVCodecContext::pre_me::get()
 }
 void FFmpeg::AVCodecContext::pre_me::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "preme", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "preme", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
-		((::AVCodecContext*)m_pPointer)->pre_me = (int)value;
+		((::AVCodecContext*)m_pPointer)->pre_me = value;
 #endif
 	}
 }
@@ -4159,10 +4156,10 @@ int FFmpeg::AVCodecContext::scenechange_threshold::get()
 }
 void FFmpeg::AVCodecContext::scenechange_threshold::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "sc_threshold", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "sc_threshold", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
-		((::AVCodecContext*)m_pPointer)->scenechange_threshold = (int)value;
+		((::AVCodecContext*)m_pPointer)->scenechange_threshold = value;
 #endif
 	}
 } 
@@ -4180,10 +4177,10 @@ int FFmpeg::AVCodecContext::noise_reduction::get()
 }
 void FFmpeg::AVCodecContext::noise_reduction::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "nr", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "nr", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
-		((::AVCodecContext*)m_pPointer)->noise_reduction = (int)value;
+		((::AVCodecContext*)m_pPointer)->noise_reduction = value;
 #endif
 	}
 } 
@@ -4246,10 +4243,10 @@ int FFmpeg::AVCodecContext::me_penalty_compensation::get()
 }
 void FFmpeg::AVCodecContext::me_penalty_compensation::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "mepc", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "mepc", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
-		((::AVCodecContext*)m_pPointer)->me_penalty_compensation = (int)value;
+		((::AVCodecContext*)m_pPointer)->me_penalty_compensation = value;
 #endif
 	}
 } 
@@ -4276,10 +4273,10 @@ int FFmpeg::AVCodecContext::brd_scale::get()
 }
 void FFmpeg::AVCodecContext::brd_scale::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "brd_scale", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "brd_scale", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
-		((::AVCodecContext*)m_pPointer)->brd_scale = (int)value;
+		((::AVCodecContext*)m_pPointer)->brd_scale = value;
 #endif
 	}
 } 
@@ -4315,10 +4312,10 @@ int FFmpeg::AVCodecContext::chromaoffset::get()
 }
 void FFmpeg::AVCodecContext::chromaoffset::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "chromaoffset", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "chromaoffset", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
-		((::AVCodecContext*)m_pPointer)->chromaoffset = (int)value;
+		((::AVCodecContext*)m_pPointer)->chromaoffset = value;
 #endif
 	}
 } 
@@ -4345,10 +4342,10 @@ int FFmpeg::AVCodecContext::b_sensitivity::get()
 }
 void FFmpeg::AVCodecContext::b_sensitivity::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "b_sensitivity", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "b_sensitivity", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
-		((::AVCodecContext*)m_pPointer)->b_sensitivity = (int)value;
+		((::AVCodecContext*)m_pPointer)->b_sensitivity = value;
 #endif
 	}
 } 
@@ -4373,7 +4370,7 @@ void FFmpeg::AVCodecContext::color_trc::set(AVColorTransferCharacteristic value)
 
 FFmpeg::AVColorSpace FFmpeg::AVCodecContext::colorspace::get()
 {
-	return (AVColorSpace)((::AVCodecContext*)m_pPointer)->colorspace;
+	return ((::AVCodecContext*)m_pPointer)->colorspace;
 }
 void FFmpeg::AVCodecContext::colorspace::set(AVColorSpace value)
 {
@@ -4436,7 +4433,7 @@ void FFmpeg::AVCodecContext::channels::set(int value)
 
 FFmpeg::AVSampleFormat FFmpeg::AVCodecContext::sample_fmt::get()
 {
-	return (AVSampleFormat)((::AVCodecContext*)m_pPointer)->sample_fmt;
+	return ((::AVCodecContext*)m_pPointer)->sample_fmt;
 }
 void FFmpeg::AVCodecContext::sample_fmt::set(AVSampleFormat value)
 {
@@ -4472,7 +4469,7 @@ void FFmpeg::AVCodecContext::cutoff::set(int value)
 
 FFmpeg::AVChannelLayout FFmpeg::AVCodecContext::channel_layout::get()
 {
-	return (AVChannelLayout)((::AVCodecContext*)m_pPointer)->channel_layout;
+	return ((::AVCodecContext*)m_pPointer)->channel_layout;
 }
 void FFmpeg::AVCodecContext::channel_layout::set(AVChannelLayout value)
 {
@@ -4481,7 +4478,7 @@ void FFmpeg::AVCodecContext::channel_layout::set(AVChannelLayout value)
 
 FFmpeg::AVChannelLayout FFmpeg::AVCodecContext::request_channel_layout::get()
 {
-	return (AVChannelLayout)((::AVCodecContext*)m_pPointer)->request_channel_layout;
+	return ((::AVCodecContext*)m_pPointer)->request_channel_layout;
 }
 void FFmpeg::AVCodecContext::request_channel_layout::set(AVChannelLayout value)
 {
@@ -4499,7 +4496,7 @@ void FFmpeg::AVCodecContext::audio_service_type::set(AVAudioServiceType value)
 
 FFmpeg::AVSampleFormat FFmpeg::AVCodecContext::request_sample_fmt::get()
 {
-	return (AVSampleFormat)((::AVCodecContext*)m_pPointer)->request_sample_fmt;
+	return ((::AVCodecContext*)m_pPointer)->request_sample_fmt;
 }
 void FFmpeg::AVCodecContext::request_sample_fmt::set(AVSampleFormat value)
 {
@@ -4573,10 +4570,10 @@ int FFmpeg::AVCodecContext::refcounted_frames::get()
 }
 void FFmpeg::AVCodecContext::refcounted_frames::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "refcounted_frames", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "refcounted_frames", value, 0))
 	{
 #if (LIBAVCODEC_VERSION_MAJOR < 59)
-		((::AVCodecContext*)m_pPointer)->refcounted_frames = (int)value;
+		((::AVCodecContext*)m_pPointer)->refcounted_frames = value;
 #endif
 	}
 }
@@ -4655,7 +4652,7 @@ void FFmpeg::AVCodecContext::rc_override::set(array<RcOverride^>^ value)
 {
 	if (value != nullptr && value->Length > 0)
 	{
-		::RcOverride * p = (::RcOverride *)AllocMemory("rc_override",value->Length * sizeof(::RcOverride)).ToPointer();
+		auto p = (::RcOverride *)AllocMemory("rc_override",value->Length * sizeof(::RcOverride)).ToPointer();
 		((::AVCodecContext*)m_pPointer)->rc_override = p;
 		((::AVCodecContext*)m_pPointer)->rc_override_count = value->Length;
 		for (int i = 0; i < value->Length; i++)
@@ -4750,10 +4747,10 @@ int FFmpeg::AVCodecContext::context_model::get()
 }
 void FFmpeg::AVCodecContext::context_model::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "context", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "context", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
-		((::AVCodecContext*)m_pPointer)->context_model = (int)value;
+		((::AVCodecContext*)m_pPointer)->context_model = value;
 #endif
 	}
 }
@@ -4771,7 +4768,7 @@ int FFmpeg::AVCodecContext::frame_skip_threshold::get()
 }
 void FFmpeg::AVCodecContext::frame_skip_threshold::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "skip_threshold", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "skip_threshold", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
 		((::AVCodecContext*)m_pPointer)->frame_skip_threshold = value;
@@ -4792,7 +4789,7 @@ int FFmpeg::AVCodecContext::frame_skip_factor::get()
 }
 void FFmpeg::AVCodecContext::frame_skip_factor::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "skip_factor", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "skip_factor", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
 		((::AVCodecContext*)m_pPointer)->frame_skip_factor = value;
@@ -4813,7 +4810,7 @@ int FFmpeg::AVCodecContext::frame_skip_exp::get()
 }
 void FFmpeg::AVCodecContext::frame_skip_exp::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "skip_exp", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "skip_exp", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
 		((::AVCodecContext*)m_pPointer)->frame_skip_exp = value;
@@ -4834,7 +4831,7 @@ int FFmpeg::AVCodecContext::frame_skip_cmp::get()
 }
 void FFmpeg::AVCodecContext::frame_skip_cmp::set(int value)
 {
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "skipcmp", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "skipcmp", value, 0))
 	{
 #if FF_API_PRIVATE_OPT
 		((::AVCodecContext*)m_pPointer)->frame_skip_cmp = value;
@@ -5088,7 +5085,7 @@ void FFmpeg::AVCodecContext::hwaccel_context::set(IntPtr value)
 FFmpeg::AVArray<UInt64>^ FFmpeg::AVCodecContext::error::get()
 {
 	auto p = ((::AVCodecContext *)m_pPointer)->error;
-	AVArray<UInt64>^ _array = (AVArray<UInt64>^)GetObject((IntPtr)p);
+	auto _array = (AVArray<UInt64>^)GetObject((IntPtr)p);
 	if (_array) return _array;
 	return gcnew FFmpeg::AVArray<UInt64>(((::AVCodecContext*)m_pPointer)->error,this,sizeof(UInt64),AV_NUM_DATA_POINTERS);
 }
@@ -5144,7 +5141,7 @@ void FFmpeg::AVCodecContext::lowres::set(int value)
 	LOAD_API(AVCodec,void,av_codec_set_lowres,const ::AVCodecContext*,int);
 	if (av_codec_set_lowres)
 		av_codec_set_lowres((::AVCodecContext*)m_pPointer,value);
-	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "lowres", (int64_t)value, 0))
+	if (AVERROR_OPTION_NOT_FOUND == av_opt_set_int(m_pPointer, "lowres", value, 0))
 	{
 #if FF_API_LOWRES
 		((::AVCodecContext*)m_pPointer)->lowres = value;
@@ -5156,7 +5153,7 @@ FFmpeg::AVFrame^ FFmpeg::AVCodecContext::coded_frame::get()
 {
 	FFmpeg::AVFrame^ frame = nullptr;
 #if FF_API_CODED_FRAME
-	frame = _CreateObject<AVFrame>((void*)((::AVCodecContext*)m_pPointer)->coded_frame);
+	frame = _CreateObject<AVFrame>(((::AVCodecContext*)m_pPointer)->coded_frame);
 #endif
 	return frame;
 }
@@ -5240,7 +5237,7 @@ array<byte>^ FFmpeg::AVCodecContext::subtitle_header::get()
 {
 	List<byte>^ _array = nullptr;
 	int nCount = ((::AVCodecContext*)m_pPointer)->subtitle_header_size;
-	uint8_t * p = (uint8_t *)((::AVCodecContext*)m_pPointer)->subtitle_header;
+	auto p = ((::AVCodecContext*)m_pPointer)->subtitle_header;
 	if (p && nCount > 0)
 	{
 		_array =  gcnew List<byte>();
@@ -5295,7 +5292,7 @@ int FFmpeg::AVCodecContext::initial_padding::get()
 }
 FFmpeg::AVRational^ FFmpeg::AVCodecContext::framerate::get()
 {
-	return _CreateObject<AVRational>((void*)&((::AVCodecContext*)m_pPointer)->framerate);
+	return _CreateObject<AVRational>(&((::AVCodecContext*)m_pPointer)->framerate);
 }
 
 void FFmpeg::AVCodecContext::framerate::set(AVRational^ value)
@@ -5306,7 +5303,7 @@ void FFmpeg::AVCodecContext::framerate::set(AVRational^ value)
 
 FFmpeg::AVPixelFormat FFmpeg::AVCodecContext::sw_pix_fmt::get()
 {
-	return (AVPixelFormat)((::AVCodecContext*)m_pPointer)->sw_pix_fmt;
+	return ((::AVCodecContext*)m_pPointer)->sw_pix_fmt;
 }
 FFmpeg::AVRational^ FFmpeg::AVCodecContext::pkt_timebase::get()
 {
@@ -5323,7 +5320,7 @@ FFmpeg::AVRational^ FFmpeg::AVCodecContext::pkt_timebase::get()
 			_rational = ((::AVCodecContext*)m_pPointer)->pkt_timebase;
 		}
 	}
-	return gcnew AVRational(*((Int64*)&_rational));	
+	return gcnew AVRational(*(Int64*)&_rational);	
 }
 void FFmpeg::AVCodecContext::pkt_timebase::set(AVRational^ value)
 {
@@ -5359,7 +5356,7 @@ FFmpeg::AVCodecDescriptor^ FFmpeg::AVCodecContext::codec_descriptor::get()
 void FFmpeg::AVCodecContext::codec_descriptor::set(AVCodecDescriptor^ value)
 {
 	const ::AVCodecDescriptor * old = nullptr;
-	const ::AVCodecDescriptor * p = (const ::AVCodecDescriptor *)(value != nullptr ? value->_Pointer.ToPointer() : nullptr);
+	auto p = (const ::AVCodecDescriptor *)(value != nullptr ? value->_Pointer.ToPointer() : nullptr);
 	LOAD_API(AVCodec,void,av_codec_set_codec_descriptor,const ::AVCodecContext*,const ::AVCodecDescriptor *);
 	LOAD_API(AVCodec,::AVCodecDescriptor *,av_codec_get_codec_descriptor,const ::AVCodecContext*);
 	if (av_codec_get_codec_descriptor)
@@ -5540,10 +5537,10 @@ FFmpeg::FF_CODEC_PROPERTY FFmpeg::AVCodecContext::properties::get()
 }
 array<FFmpeg::AVPacketSideData^>^ FFmpeg::AVCodecContext::coded_side_data::get()
 {
-	List<AVPacketSideData^>^ list = gcnew List<AVPacketSideData^>();
+	auto list = gcnew List<AVPacketSideData^>();
 	try
 	{
-		auto p = ((::AVCodecContext*)m_pPointer);
+		auto p = (::AVCodecContext*)m_pPointer;
 		for (int i = 0; i < p->nb_coded_side_data; i++)
 		{
 			list->Add(_CreateObject<AVPacketSideData>(&p->coded_side_data[i]));
@@ -5607,7 +5604,7 @@ bool FFmpeg::AVCodecContext::apply_cropping::get()
 }
 void FFmpeg::AVCodecContext::apply_cropping::set(bool value)
 {
-	((::AVCodecContext*)m_pPointer)->apply_cropping = (value ? 1 : 0);
+	((::AVCodecContext*)m_pPointer)->apply_cropping = value ? 1 : 0;
 }
 int FFmpeg::AVCodecContext::extra_hw_frames::get()
 {
@@ -5641,7 +5638,7 @@ FFmpeg::AVRESULT FFmpeg::AVCodecContext::CopyTo(AVCodecContext^ dest)
 		{
 			try
 			{
-				ret = avcodec_parameters_from_context(parameters, ((::AVCodecContext*)m_pPointer));
+				ret = avcodec_parameters_from_context(parameters, (::AVCodecContext*)m_pPointer);
 				if (ret >= 0)
 				{
 					ret = avcodec_parameters_to_context((::AVCodecContext*)dest->_Pointer.ToPointer(),parameters);
@@ -5696,7 +5693,7 @@ void FFmpeg::AVCodecContext::AlignDimentions(int % _width,int % _height)
 	int height = _height;
 	try
 	{
-		avcodec_align_dimensions(((::AVCodecContext*)m_pPointer),&width,&height);
+		avcodec_align_dimensions((::AVCodecContext*)m_pPointer,&width,&height);
 	}
 	finally
 	{
@@ -5710,11 +5707,11 @@ void FFmpeg::AVCodecContext::AlignDimentions(int % _width,int % _height,array<in
 	int width = _width;
 	int height = _height;
 	int line[AV_NUM_DATA_POINTERS];
-	memset(line,0x00,sizeof(line));
+	memset(line,0x00,sizeof line);
 	try
 	{
-		avcodec_align_dimensions2(((::AVCodecContext*)m_pPointer),&width,&height,line);
-		List<int>^ _list = gcnew List<int>();
+		avcodec_align_dimensions2((::AVCodecContext*)m_pPointer,&width,&height,line);
+		auto _list = gcnew List<int>();
 		for(int i = 0; i < _countof(line); i++) { _list->Add(line[i]); }
 		linesize_align = _list->ToArray();
 	}
@@ -5773,7 +5770,7 @@ int FFmpeg::AVCodecContext::DecodeAudio(AVFrame^ frame,bool % got_frame_ptr,AVPa
 	}
 	finally
 	{
-		got_frame_ptr = (i_got_frame_ptr != 0);
+		got_frame_ptr = i_got_frame_ptr != 0;
 		if (got_frame_ptr) frame->m_pDescructor = (TFreeFN*)av_frame_unref;
 	}
 }
@@ -5816,7 +5813,7 @@ int FFmpeg::AVCodecContext::DecodeVideo(AVFrame^ frame,bool % got_picture_ptr,AV
 	}
 	finally
 	{
-		got_picture_ptr = (i_got_picture_ptr != 0);
+		got_picture_ptr = i_got_picture_ptr != 0;
 		if (got_picture_ptr) frame->m_pDescructor = (TFreeFN*)av_frame_unref;
 	}
 }
@@ -5831,7 +5828,7 @@ FFmpeg::AVRESULT FFmpeg::AVCodecContext::DecodeSubtitle(AVSubtitle^ sub,bool % g
 	}
 	finally
 	{
-		got_sub_ptr = (i_got_sub_ptr != 0);
+		got_sub_ptr = i_got_sub_ptr != 0;
 		sub->m_pDescructor = got_sub_ptr ? (TFreeFN*)avsubtitle_free : nullptr;
 	}
 }
@@ -5860,7 +5857,7 @@ FFmpeg::AVRESULT FFmpeg::AVCodecContext::EncodeAudio(AVPacket^ avpkt,AVFrame^ fr
 				ret = avcodec_send_frame((::AVCodecContext*)m_pPointer, p);
 				if (!again)
 				{
-					again = (ret == AVERROR(EAGAIN));
+					again = ret == AVERROR(EAGAIN);
 					if (ret >= 0 || ret == AVERROR(EAGAIN))
 					{
 						ret = avcodec_receive_packet((::AVCodecContext*)m_pPointer, (::AVPacket*)avpkt->_Pointer.ToPointer());
@@ -5882,7 +5879,7 @@ FFmpeg::AVRESULT FFmpeg::AVCodecContext::EncodeAudio(AVPacket^ avpkt,AVFrame^ fr
 	}
 	finally
 	{
-		got_packet_ptr = (i_got_packet_ptr != 0);
+		got_packet_ptr = i_got_packet_ptr != 0;
 	}
 }
 
@@ -5910,7 +5907,7 @@ FFmpeg::AVRESULT FFmpeg::AVCodecContext::EncodeVideo(AVPacket^ avpkt,AVFrame^ fr
 				ret = avcodec_send_frame((::AVCodecContext*)m_pPointer, p);
 				if (!again)
 				{
-					again = (ret == AVERROR(EAGAIN));
+					again = ret == AVERROR(EAGAIN);
 					if (ret >= 0 || ret == AVERROR(EAGAIN))
 					{
 						ret = avcodec_receive_packet((::AVCodecContext*)m_pPointer, (::AVPacket*)avpkt->_Pointer.ToPointer());
@@ -5932,7 +5929,7 @@ FFmpeg::AVRESULT FFmpeg::AVCodecContext::EncodeVideo(AVPacket^ avpkt,AVFrame^ fr
 	}
 	finally
 	{
-		got_packet_ptr = (i_got_packet_ptr != 0);
+		got_packet_ptr = i_got_packet_ptr != 0;
 	}
 }
 
@@ -5962,7 +5959,7 @@ FFmpeg::AVPixelFormat FFmpeg::AVCodecContext::default_get_format(array<AVPixelFo
 {
 	AVPixelFormat _result = AVPixelFormat::NONE;
 	int count = (fmt != nullptr ? fmt->Length : 0) + 1;
-	::AVPixelFormat * p = (::AVPixelFormat *)av_malloc(count * sizeof(::AVPixelFormat));
+	auto p = (::AVPixelFormat *)av_malloc(count * sizeof(::AVPixelFormat));
 	if (p)
 	{
 		try
@@ -5984,14 +5981,13 @@ FFmpeg::AVPixelFormat FFmpeg::AVCodecContext::default_get_format(array<AVPixelFo
 
 FFmpeg::AVRESULT FFmpeg::AVCodecContext::default_get_buffer2(AVFrame^ frame, int flags)
 {
-	return avcodec_default_get_buffer2(((::AVCodecContext*)m_pPointer),frame != nullptr ? (::AVFrame*)frame->_Pointer.ToPointer() : nullptr,flags);
+	return avcodec_default_get_buffer2((::AVCodecContext*)m_pPointer,frame != nullptr ? (::AVFrame*)frame->_Pointer.ToPointer() : nullptr,flags);
 }
 //////////////////////////////////////////////////////
 void FFmpeg::AVCodecContext::DrawHorizBand(AVFrame^ src, array<int>^ offset, int y, int type, int height)
 {
-	DrawHorizBandHandler^ _handler;
 	Threading::Monitor::Enter(this);
-	_handler = m_pDrawHorizBand;
+	DrawHorizBandHandler^ _handler = m_pDrawHorizBand;
 	Threading::Monitor::Exit(this);
 	if (_handler)
 	{
@@ -6001,9 +5997,8 @@ void FFmpeg::AVCodecContext::DrawHorizBand(AVFrame^ src, array<int>^ offset, int
 
 FFmpeg::AVPixelFormat FFmpeg::AVCodecContext::GetFormat(array<AVPixelFormat>^ fmt)
 {
-	GetFormatHandler^ _handler;
 	Threading::Monitor::Enter(this);
-	_handler = m_pGetFormat;
+	GetFormatHandler^ _handler = m_pGetFormat;
 	Threading::Monitor::Exit(this);
 	if (_handler)
 	{
@@ -6014,9 +6009,8 @@ FFmpeg::AVPixelFormat FFmpeg::AVCodecContext::GetFormat(array<AVPixelFormat>^ fm
 
 FFmpeg::AVRESULT FFmpeg::AVCodecContext::GetBuffer2(AVFrame^ frame, int flags)
 {
-	GetBuffer2Handler^ _handler;
 	Threading::Monitor::Enter(this);
-	_handler = m_pGetBuffer2;
+	GetBuffer2Handler^ _handler = m_pGetBuffer2;
 	Threading::Monitor::Exit(this);
 	if (_handler)
 	{
@@ -6028,7 +6022,7 @@ FFmpeg::AVRESULT FFmpeg::AVCodecContext::GetBuffer2(AVFrame^ frame, int flags)
 // ICloneable
 Object^ FFmpeg::AVCodecContext::Clone()
 {
-	AVCodecContext^ dest = gcnew AVCodecContext(nullptr);
+	auto dest = gcnew AVCodecContext(nullptr);
 	CopyTo(dest);
 	return dest;
 }
@@ -6139,8 +6133,8 @@ bool FFmpeg::AVCodecParser::AVCodecParsers::Enumerator::MoveNext()
 		}
 	}
 	m_pOpaque = IntPtr(opaque);
-	m_pCurrent = (p != nullptr) ? gcnew AVCodecParser((void*)p, nullptr) : nullptr;
-	return (m_pCurrent != nullptr);
+	m_pCurrent = p != nullptr ? gcnew AVCodecParser((void*)p, nullptr) : nullptr;
+	return m_pCurrent != nullptr;
 }
 
 FFmpeg::AVCodecParser^ FFmpeg::AVCodecParser::AVCodecParsers::Enumerator::Current::get()
@@ -6202,13 +6196,13 @@ FFmpeg::AVCodecParser^ FFmpeg::AVCodecParser::Next(AVCodecParser^ _current)
 		if (av_parser_iterate)
 		{
 			void * opaque = nullptr;
-			bool bMoveNext = (_current != nullptr);
+			bool bMoveNext = _current != nullptr;
 			do
 			{
 				p = av_parser_iterate(&opaque);
 				if (p && bMoveNext)
 				{
-					bMoveNext = (p != _current->_Pointer.ToPointer());
+					bMoveNext = p != _current->_Pointer.ToPointer();
 					continue;
 				}
 				break;
@@ -6251,7 +6245,7 @@ IntPtr FFmpeg::AVCodecParserContext::priv_data::get()
 }
 FFmpeg::AVCodecParser^ FFmpeg::AVCodecParserContext::parser::get()
 {
-	return _CreateObject<AVCodecParser>((void*)((::AVCodecParserContext*)m_pPointer)->parser);
+	return _CreateObject<AVCodecParser>(((::AVCodecParserContext*)m_pPointer)->parser);
 }
 Int64 FFmpeg::AVCodecParserContext::frame_offset::get()
 {
@@ -6299,21 +6293,21 @@ int FFmpeg::AVCodecParserContext::cur_frame_start_index::get()
 }
 array<Int64>^ FFmpeg::AVCodecParserContext::cur_frame_offset::get()
 {
-	List<Int64>^ _list = gcnew List<Int64>();
+	auto _list = gcnew List<Int64>();
 	int64_t * p = ((::AVCodecParserContext*)m_pPointer)->cur_frame_offset;
 	for (int i = 0; i < AV_PARSER_PTS_NB; i++) _list->Add(p[i]);
 	return _list->ToArray();
 }
 array<Int64>^ FFmpeg::AVCodecParserContext::cur_frame_pts::get()
 {
-	List<Int64>^ _list = gcnew List<Int64>();
+	auto _list = gcnew List<Int64>();
 	int64_t * p = ((::AVCodecParserContext*)m_pPointer)->cur_frame_pts;
 	for (int i = 0; i < AV_PARSER_PTS_NB; i++) _list->Add(p[i]);
 	return _list->ToArray();
 }
 array<Int64>^ FFmpeg::AVCodecParserContext::cur_frame_dts::get()
 {
-	List<Int64>^ _list = gcnew List<Int64>();
+	auto _list = gcnew List<Int64>();
 	int64_t * p = ((::AVCodecParserContext*)m_pPointer)->cur_frame_dts;
 	for (int i = 0; i < AV_PARSER_PTS_NB; i++) _list->Add(p[i]);
 	return _list->ToArray();
@@ -6328,7 +6322,7 @@ Int64 FFmpeg::AVCodecParserContext::offset::get()
 }
 array<Int64>^ FFmpeg::AVCodecParserContext::cur_frame_end::get()
 {
-	List<Int64>^ _list = gcnew List<Int64>();
+	auto _list = gcnew List<Int64>();
 	int64_t * p = ((::AVCodecParserContext*)m_pPointer)->cur_frame_end;
 	for (int i = 0; i < AV_PARSER_PTS_NB; i++) _list->Add(p[i]);
 	return _list->ToArray();
@@ -6359,7 +6353,7 @@ int FFmpeg::AVCodecParserContext::pts_dts_delta::get()
 }
 array<Int64>^ FFmpeg::AVCodecParserContext::cur_frame_pos::get()
 {
-	List<Int64>^ _list = gcnew List<Int64>();
+	auto _list = gcnew List<Int64>();
 	int64_t * p = ((::AVCodecParserContext*)m_pPointer)->cur_frame_pos;
 	for (int i = 0; i < AV_PARSER_PTS_NB; i++) _list->Add(p[i]);
 	return _list->ToArray();
@@ -6435,7 +6429,7 @@ int FFmpeg::AVCodecParserContext::Parse(AVCodecContext^ avctx,
 		Int64 pos)
 {
 	pin_ptr<byte> _data = &buf[0];
-	uint8_t * pData = (uint8_t *)_data;
+	auto pData = (uint8_t *)_data;
 	return Parse(avctx,poutbuf,poutbuf_size,(IntPtr)pData,buf->Length,pts,dts,pos);
 }
 
@@ -6446,7 +6440,7 @@ int FFmpeg::AVCodecParserContext::Parse(AVCodecContext^ avctx,
 	Int64 pos)
 {
 	pin_ptr<byte> _data = &buf[0];
-	uint8_t * pData = (uint8_t *)_data;
+	auto pData = (uint8_t *)_data;
 
 	return Parse(avctx,pkt,(IntPtr)pData,buf->Length,pts,dts,pos);
 }
@@ -6565,7 +6559,7 @@ int FFmpeg::AVCodecParserContext::Parse(AVCodecContext^ avctx,AVPacket^ out_pkt,
 	int buf_size = 0;
 	if (in_pkt != nullptr)
 	{
-		::AVPacket * p = (::AVPacket *)in_pkt->_Pointer.ToPointer();
+		auto p = (::AVPacket *)in_pkt->_Pointer.ToPointer();
 		if (p)
 		{
 			pts = p->pts;
@@ -6700,8 +6694,8 @@ bool FFmpeg::AVBitStreamFilter::AVBitStreamFilters::AVBitStreamFilterEnumerator:
 		}
 	}
 	m_pOpaque = IntPtr(opaque);
-	m_pCurrent = (p != nullptr) ? gcnew AVBitStreamFilter((void*)p, nullptr) : nullptr;
-	return (m_pCurrent != nullptr);
+	m_pCurrent = p != nullptr ? gcnew AVBitStreamFilter((void*)p, nullptr) : nullptr;
+	return m_pCurrent != nullptr;
 }
 
 FFmpeg::AVBitStreamFilter^ FFmpeg::AVBitStreamFilter::AVBitStreamFilters::AVBitStreamFilterEnumerator::Current::get()
@@ -6741,7 +6735,7 @@ array<FFmpeg::AVCodecID>^ FFmpeg::AVBitStreamFilter::codec_ids::get()
 {
 	auto p = ((::AVBitStreamFilter*)m_pPointer)->codec_ids;
 	if (p == nullptr) return nullptr;
-	List<AVCodecID>^ list = gcnew List<AVCodecID>();
+	auto list = gcnew List<AVCodecID>();
 	try
 	{
 		while (*p != AV_CODEC_ID_NONE)
@@ -6801,13 +6795,13 @@ FFmpeg::AVBitStreamFilter^ FFmpeg::AVBitStreamFilter::Next(AVBitStreamFilter^ f)
 		if (av_bsf_iterate)
 		{
 			void * opaque = nullptr;
-			bool bMoveNext = (f != nullptr);
+			bool bMoveNext = f != nullptr;
 			do
 			{
 				p = av_bsf_iterate(&opaque);
 				if (p && bMoveNext)
 				{
-					bMoveNext = (p != f->_Pointer.ToPointer());
+					bMoveNext = p != f->_Pointer.ToPointer();
 					continue;
 				}
 				break;
@@ -6954,7 +6948,7 @@ FFmpeg::AVBSFContext::AVBSFContext(AVBitStreamFilter^ filter)
 	if (av_bsf_alloc)
 	{
 		::AVBSFContext * p = nullptr;
-		if (0 <= av_bsf_alloc((::AVBitStreamFilter*)(filter->_Pointer.ToPointer()), &p))
+		if (0 <= av_bsf_alloc((::AVBitStreamFilter*)filter->_Pointer.ToPointer(), &p))
 		{
 			m_pPointer = p;
 			m_pFreep = (TFreeFNP*)av_bsf_free;
@@ -6969,7 +6963,7 @@ FFmpeg::AVBSFContext::AVBSFContext(AVBSFList^ lst)
 	if (av_bsf_list_finalize)
 	{
 		::AVBSFContext * p = nullptr;
-		::AVBSFList* l = (::AVBSFList*)lst->_Pointer.ToPointer();
+		auto l = (::AVBSFList*)lst->_Pointer.ToPointer();
 		auto result = av_bsf_list_finalize(&l, &p);
 		if (p)
 		{
@@ -7022,7 +7016,7 @@ String^ FFmpeg::AVBSFContext::ToString()
 {
 	if (m_pPointer && ((::AVBSFContext *)m_pPointer)->filter)
 	{
-		String^ _name = gcnew String(((::AVBSFContext *)m_pPointer)->filter->name);
+		auto _name = gcnew String(((::AVBSFContext *)m_pPointer)->filter->name);
 		if (!String::IsNullOrEmpty(_name))
 		{
 			return "[ AVBSFContext ] \"" + _name +"\"";
@@ -7060,7 +7054,7 @@ FFmpeg::AVRESULT FFmpeg::AVBSFContext::Parse(String^ str, AVBSFContext^ % bsf)
 	DYNAMIC_DEF_API(AVCodec,int,AVERROR(ENOSYS),av_bsf_list_parse_str,char*,::AVBSFContext **);
 	LOAD_API(AVCodec,void,av_bsf_free,::AVBSFContext**);
 	::AVBSFContext * p = nullptr;
-	char * _str = (char *)AllocString(str).ToPointer();
+	auto _str = (char *)AllocString(str).ToPointer();
 	try
 	{
 		auto result = av_bsf_list_parse_str(_str,&p);
@@ -7111,7 +7105,7 @@ FFmpeg::AVBSFList::AVBSFList()
 FFmpeg::AVRESULT FFmpeg::AVBSFList::Append(AVBSFContext^ bsf)
 {
 	DYNAMIC_DEF_API(AVCodec,int,AVERROR(ENOSYS),av_bsf_list_append,::AVBSFList *, ::AVBSFContext *);
-	return av_bsf_list_append(((::AVBSFList*)m_pPointer),(::AVBSFContext*)bsf->_Pointer.ToPointer());
+	return av_bsf_list_append((::AVBSFList*)m_pPointer,(::AVBSFContext*)bsf->_Pointer.ToPointer());
 }
 FFmpeg::AVRESULT FFmpeg::AVBSFList::Append(String^ bsf_name)
 {
@@ -7121,7 +7115,7 @@ FFmpeg::AVRESULT FFmpeg::AVBSFList::Append(String^ bsf_name, AVDictionary^ optio
 {
 	DYNAMIC_DEF_API(AVCodec,int,AVERROR(ENOSYS),av_bsf_list_append2,::AVBSFList *,char *, ::AVDictionary **);
 	AVRESULT _result;
-	char * _bsf_name = (char *)AllocString(bsf_name).ToPointer();
+	auto _bsf_name = (char *)AllocString(bsf_name).ToPointer();
 	::AVDictionary * _dict = options != nullptr ? (::AVDictionary *)options->_Pointer.ToPointer() : nullptr;
 	try
 	{

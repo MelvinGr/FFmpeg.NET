@@ -31,36 +31,36 @@ public enum class AVFilterFlags : int
 	/// The number of the filter inputs is not determined just by AVFilter.inputs.
 	/// The filter might add additional inputs during initialization depending on the
 	/// options supplied to it.
-	DYNAMIC_INPUTS        = (1 << 0),
+	DYNAMIC_INPUTS        = 1 << 0,
 	/// The number of the filter outputs is not determined just by AVFilter.outputs.
 	/// The filter might add additional outputs during initialization depending on
 	/// the options supplied to it.
-	DYNAMIC_OUTPUTS       = (1 << 1),
+	DYNAMIC_OUTPUTS       = 1 << 1,
 	/// The filter supports multithreading by splitting frames into multiple parts
 	/// and processing them concurrently.
-	SLICE_THREADS         = (1 << 2),
+	SLICE_THREADS         = 1 << 2,
 	/// Some filters support a generic "enable" expression option that can be used
 	/// to enable or disable a filter in the timeline. Filters supporting this
 	/// option have this flag set. When the enable expression is false, the default
 	/// no-op filter_frame() function is called in place of the filter_frame()
 	/// callback defined on each input pad, thus the frame is passed unchanged to
 	/// the next filters.
-	SUPPORT_TIMELINE_GENERIC  = (1 << 16),
+	SUPPORT_TIMELINE_GENERIC  = 1 << 16,
 	/// Same as AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC, except that the filter will
 	/// have its filter_frame() callback(s) called as usual even when the enable
 	/// expression is false. The filter will disable filtering within the
 	/// filter_frame() callback(s) itself, for example executing code depending on
 	/// the AVFilterContext->is_disabled value.
-	SUPPORT_TIMELINE_INTERNAL = (1 << 17),
+	SUPPORT_TIMELINE_INTERNAL = 1 << 17,
 	/// Handy mask to test whether the filter supports or no the timeline feature
 	/// (internally or generically).
-	SUPPORT_TIMELINE = (SUPPORT_TIMELINE_GENERIC | SUPPORT_TIMELINE_INTERNAL),
+	SUPPORT_TIMELINE = SUPPORT_TIMELINE_GENERIC | SUPPORT_TIMELINE_INTERNAL,
 };
 //////////////////////////////////////////////////////
 public enum class AVFilterThreadType
 {
 	DEFAULT = 0,
-	SLICE = (1 << 0),
+	SLICE = 1 << 0,
 };
 //////////////////////////////////////////////////////
 public enum class AVFilterAutoConvert : int

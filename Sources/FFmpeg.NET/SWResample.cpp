@@ -82,8 +82,8 @@ void FFmpeg::SwrContext::Init(AVChannelLayout out_ch_layout, AVSampleFormat out_
 		  int log_offset, IntPtr log_ctx)
 {
 	m_pPointer = swr_alloc_set_opts(nullptr,
-		(int64_t)out_ch_layout,(::AVSampleFormat)out_sample_fmt,out_sample_rate,
-		(int64_t)in_ch_layout,(::AVSampleFormat)in_sample_fmt,in_sample_rate,
+		out_ch_layout,out_sample_fmt,out_sample_rate,
+		in_ch_layout,in_sample_fmt,in_sample_rate,
 		log_offset,log_ctx.ToPointer()
 		);
 	m_pFreep = (TFreeFNP *)swr_free;
@@ -100,20 +100,20 @@ FFmpeg::AVChannelLayout FFmpeg::SwrContext::OutChannelLayout::get()
 }
 void FFmpeg::SwrContext::OutChannelLayout::set(AVChannelLayout value)
 {
-	av_opt_set_channel_layout(m_pPointer,"out_channel_layout",(int64_t)value,0);
+	av_opt_set_channel_layout(m_pPointer,"out_channel_layout",value,0);
 }
 FFmpeg::AVSampleFormat FFmpeg::SwrContext::OutSampleFormat::get()
 {
 	::AVSampleFormat val;
 	if (0 >= av_opt_get_sample_fmt(m_pPointer,"out_sample_fmt",0,&val))
 	{
-		return (AVSampleFormat)val;
+		return val;
 	}
-	return (AVSampleFormat)0;
+	return 0;
 }
 void FFmpeg::SwrContext::OutSampleFormat::set(AVSampleFormat value)
 {
-	av_opt_set_sample_fmt(m_pPointer,"out_sample_fmt",(::AVSampleFormat)value,0);
+	av_opt_set_sample_fmt(m_pPointer,"out_sample_fmt",value,0);
 }
 int FFmpeg::SwrContext::OutSampleRate::get()
 {
@@ -126,7 +126,7 @@ int FFmpeg::SwrContext::OutSampleRate::get()
 }
 void FFmpeg::SwrContext::OutSampleRate::set(int value)
 {
-	av_opt_set_int(m_pPointer,"out_sample_rate",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"out_sample_rate",value,0);
 }
 FFmpeg::AVChannelLayout FFmpeg::SwrContext::InChannelLayout::get()
 {
@@ -139,20 +139,20 @@ FFmpeg::AVChannelLayout FFmpeg::SwrContext::InChannelLayout::get()
 }
 void FFmpeg::SwrContext::InChannelLayout::set(AVChannelLayout value)
 {
-	av_opt_set_channel_layout(m_pPointer,"in_channel_layout",(int64_t)value,0);
+	av_opt_set_channel_layout(m_pPointer,"in_channel_layout",value,0);
 }
 FFmpeg::AVSampleFormat FFmpeg::SwrContext::InSampleFormat::get()
 {
 	::AVSampleFormat val;
 	if (0 >= av_opt_get_sample_fmt(m_pPointer,"in_sample_fmt",0,&val))
 	{
-		return (AVSampleFormat)val;
+		return val;
 	}
-	return (AVSampleFormat)0;
+	return 0;
 }
 void FFmpeg::SwrContext::InSampleFormat::set(AVSampleFormat value)
 {
-	av_opt_set_sample_fmt(m_pPointer,"in_sample_fmt",(::AVSampleFormat)value,0);
+	av_opt_set_sample_fmt(m_pPointer,"in_sample_fmt",value,0);
 }
 int FFmpeg::SwrContext::InSampleRate::get()
 {
@@ -165,7 +165,7 @@ int FFmpeg::SwrContext::InSampleRate::get()
 }
 void FFmpeg::SwrContext::InSampleRate::set(int value)
 {
-	av_opt_set_int(m_pPointer,"in_sample_rate",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"in_sample_rate",value,0);
 }
 FFmpeg::SwrFlags FFmpeg::SwrContext::Flags::get()
 {
@@ -191,7 +191,7 @@ float FFmpeg::SwrContext::DitherScale::get()
 }
 void FFmpeg::SwrContext::DitherScale::set(float value)
 {
-	av_opt_set_double(m_pPointer,"dither_scale",(double)value,0);
+	av_opt_set_double(m_pPointer,"dither_scale",value,0);
 }
 FFmpeg::SwrDitherType FFmpeg::SwrContext::Dither::get()
 {
@@ -217,7 +217,7 @@ int FFmpeg::SwrContext::FilterSize::get()
 }
 void FFmpeg::SwrContext::FilterSize::set(int value)
 {
-	av_opt_set_int(m_pPointer,"filter_size",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"filter_size",value,0);
 }
 int FFmpeg::SwrContext::PhaseShift::get()
 {
@@ -230,7 +230,7 @@ int FFmpeg::SwrContext::PhaseShift::get()
 }
 void FFmpeg::SwrContext::PhaseShift::set(int value)
 {
-	av_opt_set_int(m_pPointer,"phase_shift",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"phase_shift",value,0);
 }
 bool FFmpeg::SwrContext::LinearInterp::get()
 {
@@ -250,13 +250,13 @@ double FFmpeg::SwrContext::CutOff::get()
 	double val;
 	if (0 >= av_opt_get_double(m_pPointer,"cutoff",0,&val))
 	{
-		return (double)val;
+		return val;
 	}
-	return (double)0;
+	return 0;
 }
 void FFmpeg::SwrContext::CutOff::set(double value)
 {
-	av_opt_set_double(m_pPointer,"cutoff",(double)value,0);
+	av_opt_set_double(m_pPointer,"cutoff",value,0);
 }
 int FFmpeg::SwrContext::OutChannelCount::get()
 {
@@ -269,7 +269,7 @@ int FFmpeg::SwrContext::OutChannelCount::get()
 }
 void FFmpeg::SwrContext::OutChannelCount::set(int value)
 {
-	av_opt_set_int(m_pPointer,"out_channel_count",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"out_channel_count",value,0);
 }
 int FFmpeg::SwrContext::InChannelCount::get()
 {
@@ -282,7 +282,7 @@ int FFmpeg::SwrContext::InChannelCount::get()
 }
 void FFmpeg::SwrContext::InChannelCount::set(int value)
 {
-	av_opt_set_int(m_pPointer,"in_channel_count",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"in_channel_count",value,0);
 }
 int FFmpeg::SwrContext::UsedChannelCount::get()
 {
@@ -295,20 +295,20 @@ int FFmpeg::SwrContext::UsedChannelCount::get()
 }
 void FFmpeg::SwrContext::UsedChannelCount::set(int value)
 {
-	av_opt_set_int(m_pPointer,"used_channel_count",(int64_t)value,0);
+	av_opt_set_int(m_pPointer,"used_channel_count",value,0);
 }
 FFmpeg::AVSampleFormat FFmpeg::SwrContext::InternalSampleFormat::get()
 {
 	::AVSampleFormat val;
 	if (0 >= av_opt_get_sample_fmt(m_pPointer,"internal_sample_fmt",0,&val))
 	{
-		return (AVSampleFormat)val;
+		return val;
 	}
-	return (AVSampleFormat)0;
+	return 0;
 }
 void FFmpeg::SwrContext::InternalSampleFormat::set(AVSampleFormat value)
 {
-	av_opt_set_sample_fmt(m_pPointer,"internal_sample_fmt",(::AVSampleFormat)value,0);
+	av_opt_set_sample_fmt(m_pPointer,"internal_sample_fmt",value,0);
 }
 float FFmpeg::SwrContext::CenterMixLevel::get()
 {
@@ -321,7 +321,7 @@ float FFmpeg::SwrContext::CenterMixLevel::get()
 }
 void FFmpeg::SwrContext::CenterMixLevel::set(float value)
 {
-	av_opt_set_double(m_pPointer,"center_mix_level",(double)value,0);
+	av_opt_set_double(m_pPointer,"center_mix_level",value,0);
 }
 float FFmpeg::SwrContext::SurroundMixLevel::get()
 {
@@ -334,7 +334,7 @@ float FFmpeg::SwrContext::SurroundMixLevel::get()
 }
 void FFmpeg::SwrContext::SurroundMixLevel::set(float value)
 {
-	av_opt_set_double(m_pPointer,"surround_mix_level",(double)value,0);
+	av_opt_set_double(m_pPointer,"surround_mix_level",value,0);
 }
 float FFmpeg::SwrContext::LfeMixLevel::get()
 {
@@ -347,7 +347,7 @@ float FFmpeg::SwrContext::LfeMixLevel::get()
 }
 void FFmpeg::SwrContext::LfeMixLevel::set(float value)
 {
-	av_opt_set_double(m_pPointer,"lfe_mix_level",(double)value,0);
+	av_opt_set_double(m_pPointer,"lfe_mix_level",value,0);
 }
 float FFmpeg::SwrContext::RematrixVolume::get()
 {
@@ -360,7 +360,7 @@ float FFmpeg::SwrContext::RematrixVolume::get()
 }
 void FFmpeg::SwrContext::RematrixVolume::set(float value)
 {
-	av_opt_set_double(m_pPointer,"rematrix_volume",(double)value,0);
+	av_opt_set_double(m_pPointer,"rematrix_volume",value,0);
 }
 float FFmpeg::SwrContext::RematrixMaxval::get()
 {
@@ -373,7 +373,7 @@ float FFmpeg::SwrContext::RematrixMaxval::get()
 }
 void FFmpeg::SwrContext::RematrixMaxval::set(float value)
 {
-	av_opt_set_double(m_pPointer,"rematrix_maxval",(double)value,0);
+	av_opt_set_double(m_pPointer,"rematrix_maxval",value,0);
 }
 //////////////////////////////////////////////////////
 bool FFmpeg::SwrContext::IsInitialized::get()
@@ -455,7 +455,7 @@ int FFmpeg::SwrContext::Convert(array<IntPtr>^ out, int out_count, AVArray<AVMem
 {
 	uint8_t * _out[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 	uint8_t * _in[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-	for (int i = 0; i < out->Length; i++){ _out[i] = (uint8_t *)((IntPtr)out[i]).ToPointer(); }
+	for (int i = 0; i < out->Length; i++){ _out[i] = (uint8_t *)out[i].ToPointer(); }
 	if (in != nullptr)
 	{
 		for (int i = 0; i < in->Count; i++) { _in[i] = (uint8_t *)((IntPtr)in[i]).ToPointer(); }
@@ -470,7 +470,7 @@ int FFmpeg::SwrContext::Convert(AVArray<AVMemPtr^>^ out, int out_count, array<In
 	for (int i = 0; i < out->Count; i++){ _out[i] = (uint8_t *)((IntPtr)out[i]).ToPointer(); }
 	if (in != nullptr)
 	{
-		for (int i = 0; i < in->Length; i++) { _in[i] = (uint8_t *)((IntPtr)in[i]).ToPointer(); }
+		for (int i = 0; i < in->Length; i++) { _in[i] = (uint8_t *)in[i].ToPointer(); }
 	}
 	return swr_convert((::SwrContext*)m_pPointer, _out, out_count, in != nullptr ? (const uint8_t**)_in : nullptr, in_count);
 }
@@ -482,7 +482,7 @@ int FFmpeg::SwrContext::Convert(array<AVMemPtr^>^ out, int out_count, array<IntP
 	for (int i = 0; i < out->Length; i++){ _out[i] = (uint8_t *)((IntPtr)out[i]).ToPointer(); }
 	if (in != nullptr)
 	{
-		for (int i = 0; i < in->Length; i++) { _in[i] = (uint8_t *)((IntPtr)in[i]).ToPointer(); }
+		for (int i = 0; i < in->Length; i++) { _in[i] = (uint8_t *)in[i].ToPointer(); }
 	}
 	return swr_convert((::SwrContext*)m_pPointer, _out, out_count, in != nullptr ? (const uint8_t**)_in : nullptr, in_count);
 }
@@ -533,7 +533,7 @@ FFmpeg::AVRESULT FFmpeg::SwrContext::SetChannelMapping(array<int>^ channel_map)
 {
 	if (channel_map == nullptr || channel_map->Length == 0) return -1;
 	int _map[8];
-	memset(_map,0x00,sizeof(_map));
+	memset(_map,0x00,sizeof _map);
 	for (int i = 0; i < channel_map->Length && i < _countof(_map); i++) { _map[i] = channel_map[i]; }
 	return swr_set_channel_mapping((::SwrContext*)m_pPointer, _map);
 }
@@ -541,7 +541,7 @@ FFmpeg::AVRESULT FFmpeg::SwrContext::SetChannelMapping(array<int>^ channel_map)
 FFmpeg::AVRESULT FFmpeg::SwrContext::SetMatrix(array<double>^ matrix, int stride)
 {
 	if (matrix == nullptr || matrix->Length == 0) return -1;
-	double * _matrix = (double *)av_mallocz(matrix->Length * sizeof(double));
+	auto _matrix = (double *)av_mallocz(matrix->Length * sizeof(double));
 	for (int i = 0; i < matrix->Length; i++) { _matrix[i] = matrix[i]; }
 	try
 	{
@@ -580,12 +580,12 @@ array<double>^ FFmpeg::SwrContext::BuildMatrix(AVChannelLayout in_layout,
 	double rematrix_volume, int stride,
 	AVMatrixEncoding matrix_encoding, IntPtr log_ctx)
 {
-	double * _matrix = (double *)av_mallocz(stride * stride * sizeof(double));
+	auto _matrix = (double *)av_mallocz(stride * stride * sizeof(double));
 	try
 	{
 		array<double>^ matrix = nullptr;
-		if (0 <= swr_build_matrix((uint64_t)in_layout,
-			(uint64_t)out_layout,
+		if (0 <= swr_build_matrix(in_layout,
+			out_layout,
 			center_mix_level, surround_mix_level,
 			lfe_mix_level, rematrix_maxval,
 			rematrix_volume, _matrix,stride,

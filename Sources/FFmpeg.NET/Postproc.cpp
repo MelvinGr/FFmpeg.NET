@@ -136,8 +136,8 @@ void FFmpeg::PPContext::Postprocess(AVPicture^ src, AVPicture^ dst,
 	IntPtr QP_store, int QP_stride,
 	PPMode^ mode, AVPictureType pict_type)
 {
-	::AVPicture* _src = (::AVPicture*)src->_Pointer.ToPointer();
-	::AVPicture* _dst = (::AVPicture*)dst->_Pointer.ToPointer();
+	auto _src = (::AVPicture*)src->_Pointer.ToPointer();
+	auto _dst = (::AVPicture*)dst->_Pointer.ToPointer();
 
 	VOID_API(Postproc,pp_postprocess,const uint8_t * src[3], const int srcStride[3],
 		uint8_t * dst[3], const int dstStride[3],

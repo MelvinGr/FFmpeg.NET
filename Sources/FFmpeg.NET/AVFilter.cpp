@@ -145,7 +145,7 @@ bool FFmpeg::AVFilter::AVFilters::AVFilterEnumerator::MoveNext()
 	}
 	m_pCurrent = p != nullptr ? gcnew AVFilter((void*)p,nullptr) : nullptr;
 	m_pOpaque = IntPtr(opaque);
-	return (m_pCurrent != nullptr);
+	return m_pCurrent != nullptr;
 }
 FFmpeg::AVFilter^ FFmpeg::AVFilter::AVFilters::AVFilterEnumerator::Current::get()
 {
@@ -214,8 +214,7 @@ String^ FFmpeg::AVFilter::ToString()
 {
 	if (m_pPointer)
 	{
-		String^ _name;
-		_name = name;
+		String^ _name = name;
 		if (!String::IsNullOrEmpty(_name)) return _name;
 		_name = description;
 		if (!String::IsNullOrEmpty(_name)) return _name;
@@ -267,8 +266,7 @@ String^ FFmpeg::AVFilterPad::ToString()
 {
 	if (m_pPointer)
 	{
-		String^ _name;
-		_name = name;
+		String^ _name = name;
 		if (!String::IsNullOrEmpty(_name)) return _name;
 	}
 	return Object::ToString();
@@ -321,16 +319,16 @@ FFmpeg::AVFilterContext::AVFilterLinkArray::AVFilterLinkArray(void * _pointer,AV
 FFmpeg::AVFilterLink^ FFmpeg::AVFilterContext::AVFilterLinkArray::default::get(int index)
 {
 	if (index < 0 || index >= Count) throw gcnew ArgumentOutOfRangeException();
-	::AVFilterLink ** p = (::AVFilterLink **)m_pPointer;
+	auto p = (::AVFilterLink **)m_pPointer;
 	return _CreateObject<AVFilterLink>(p[index]);
 }
 int FFmpeg::AVFilterContext::AVFilterLinkArray::Count::get()
 {
-	return (m_pnCount == nullptr) ? 0 : (int)*m_pnCount;
+	return m_pnCount == nullptr ? 0 : (int)*m_pnCount;
 }
 array<FFmpeg::AVFilterLink^>^ FFmpeg::AVFilterContext::AVFilterLinkArray::ToArray()
 {
-	List<AVFilterLink^>^ _list = gcnew List<AVFilterLink^>();
+	auto _list = gcnew List<AVFilterLink^>();
 	try
 	{
 		for (int i = 0; i < Count; i++)
@@ -400,16 +398,16 @@ FFmpeg::AVFilterContext::AVFilterPadArray::AVFilterPadArray(void * _pointer,AVBa
 FFmpeg::AVFilterPad^ FFmpeg::AVFilterContext::AVFilterPadArray::default::get(int index)
 {
 	if (index < 0 || index >= Count) throw gcnew ArgumentOutOfRangeException();
-	::AVFilterPad ** p = (::AVFilterPad**)m_pPointer;
+	auto p = (::AVFilterPad**)m_pPointer;
 	return _CreateObject<AVFilterPad>(p[index]);
 }
 int FFmpeg::AVFilterContext::AVFilterPadArray::Count::get()
 {
-	return (m_pnCount == nullptr) ? 0 : (int)*m_pnCount;
+	return m_pnCount == nullptr ? 0 : (int)*m_pnCount;
 }
 array<FFmpeg::AVFilterPad^>^ FFmpeg::AVFilterContext::AVFilterPadArray::ToArray()
 {
-	List<AVFilterPad^>^ _list = gcnew List<AVFilterPad^>();
+	auto _list = gcnew List<AVFilterPad^>();
 	try
 	{
 		for (int i = 0; i < Count; i++)
@@ -454,7 +452,7 @@ String^ FFmpeg::AVFilterContext::name::get()
 }
 FFmpeg::AVFilterContext::AVFilterPadArray^ FFmpeg::AVFilterContext::input_pads::get()
 {
-	AVFilterPadArray^ _array = _CreateObject<AVFilterPadArray>((void*)((::AVFilterContext*)m_pPointer)->input_pads);
+	AVFilterPadArray^ _array = _CreateObject<AVFilterPadArray>(((::AVFilterContext*)m_pPointer)->input_pads);
 	if (_array)
 	{
 		_array->m_pnCount = &((::AVFilterContext*)m_pPointer)->nb_inputs;
@@ -463,7 +461,7 @@ FFmpeg::AVFilterContext::AVFilterPadArray^ FFmpeg::AVFilterContext::input_pads::
 }
 FFmpeg::AVFilterContext::AVFilterLinkArray^ FFmpeg::AVFilterContext::inputs::get()
 {
-	AVFilterLinkArray^ _array = _CreateObject<AVFilterLinkArray>((void*)((::AVFilterContext*)m_pPointer)->inputs);
+	AVFilterLinkArray^ _array = _CreateObject<AVFilterLinkArray>(((::AVFilterContext*)m_pPointer)->inputs);
 	if (_array)
 	{
 		_array->m_pnCount = &((::AVFilterContext*)m_pPointer)->nb_inputs;
@@ -472,7 +470,7 @@ FFmpeg::AVFilterContext::AVFilterLinkArray^ FFmpeg::AVFilterContext::inputs::get
 }
 FFmpeg::AVFilterContext::AVFilterPadArray^ FFmpeg::AVFilterContext::output_pads::get()
 {
-	AVFilterPadArray^ _array = _CreateObject<AVFilterPadArray>((void*)((::AVFilterContext*)m_pPointer)->output_pads);
+	AVFilterPadArray^ _array = _CreateObject<AVFilterPadArray>(((::AVFilterContext*)m_pPointer)->output_pads);
 	if (_array)
 	{
 		_array->m_pnCount = &((::AVFilterContext*)m_pPointer)->nb_outputs;
@@ -481,7 +479,7 @@ FFmpeg::AVFilterContext::AVFilterPadArray^ FFmpeg::AVFilterContext::output_pads:
 }
 FFmpeg::AVFilterContext::AVFilterLinkArray^ FFmpeg::AVFilterContext::outputs::get()
 {
-	AVFilterLinkArray^ _array = _CreateObject<AVFilterLinkArray>((void*)((::AVFilterContext*)m_pPointer)->outputs);
+	AVFilterLinkArray^ _array = _CreateObject<AVFilterLinkArray>(((::AVFilterContext*)m_pPointer)->outputs);
 	if (_array)
 	{
 		_array->m_pnCount = &((::AVFilterContext*)m_pPointer)->nb_outputs;
@@ -490,7 +488,7 @@ FFmpeg::AVFilterContext::AVFilterLinkArray^ FFmpeg::AVFilterContext::outputs::ge
 }
 FFmpeg::AVFilterGraph^ FFmpeg::AVFilterContext::graph::get()
 {
-	return _CreateObject<AVFilterGraph>((void*)((::AVFilterContext*)m_pPointer)->graph);
+	return _CreateObject<AVFilterGraph>(((::AVFilterContext*)m_pPointer)->graph);
 }
 FFmpeg::AVFilterThreadType FFmpeg::AVFilterContext::thread_type::get()
 {
@@ -523,7 +521,7 @@ void FFmpeg::AVFilterContext::enable_str::set(String^ value)
 
 bool FFmpeg::AVFilterContext::is_disabled::get()
 {
-	return (((::AVFilterContext*)m_pPointer)->is_disabled != 0);
+	return ((::AVFilterContext*)m_pPointer)->is_disabled != 0;
 }
 
 void FFmpeg::AVFilterContext::is_disabled::set(bool value)
@@ -544,7 +542,7 @@ void FFmpeg::AVFilterContext::nb_threads::set(int value)
 }
 bool FFmpeg::AVFilterContext::ready::get()
 { 
-	return (((::AVFilterContext*)m_pPointer)->ready != 0);
+	return ((::AVFilterContext*)m_pPointer)->ready != 0;
 }
 int FFmpeg::AVFilterContext::extra_hw_frames::get()
 {
@@ -559,8 +557,7 @@ String^ FFmpeg::AVFilterContext::ToString()
 {
 	if (m_pPointer)
 	{
-		String^ _name;
-		_name = name;
+		String^ _name = name;
 		if (!String::IsNullOrEmpty(_name)) return _name;
 	}
 	return Object::ToString();
@@ -684,7 +681,7 @@ FFmpeg::AVRational^ FFmpeg::AVFilterLink::sample_aspect_ratio::get()
 }
 FFmpeg::AVChannelLayout FFmpeg::AVFilterLink::channel_layout::get()
 {
-	return (AVChannelLayout)((::AVFilterLink*)m_pPointer)->channel_layout;
+	return ((::AVFilterLink*)m_pPointer)->channel_layout;
 }
 int FFmpeg::AVFilterLink::sample_rate::get()
 {
@@ -826,16 +823,16 @@ FFmpeg::AVFilterGraph::AVFiltersArray::AVFiltersArray(void * _pointer,AVBase^ _p
 FFmpeg::AVFilterContext^ FFmpeg::AVFilterGraph::AVFiltersArray::default::get(int index)
 {
 	if (index < 0 || index > Count) throw gcnew ArgumentOutOfRangeException();
-	::AVFilterContext ** p = (::AVFilterContext **)m_pPointer;
+	auto p = (::AVFilterContext **)m_pPointer;
 	return _CreateObject<AVFilterContext>(p[index]);
 }
 int FFmpeg::AVFilterGraph::AVFiltersArray::Count::get()
 {
-	return (m_pnCount == nullptr) ? 0 : (int)*m_pnCount;
+	return m_pnCount == nullptr ? 0 : (int)*m_pnCount;
 }
 array<FFmpeg::AVFilterContext^>^ FFmpeg::AVFilterGraph::AVFiltersArray::ToArray()
 {
-	List<AVFilterContext^>^ _list = gcnew List<AVFilterContext^>();
+	auto _list = gcnew List<AVFilterContext^>();
 	try
 	{
 		for (int i = 0; i < Count; i++)
@@ -884,7 +881,7 @@ int avfiltergraph_handler_execute(::AVFilterContext *ctx, avfilter_action_func *
 		GCHandle _handle = GCHandle::FromIntPtr((IntPtr)ctx->graph->opaque);
 		if (_handle.IsAllocated)
 		{
-			FFmpeg::AVFilterGraph^ graph = ((FFmpeg::AVFilterGraph^)_handle.Target);
+			auto graph = (FFmpeg::AVFilterGraph^)_handle.Target;
 			FFmpeg::AVFilterContext^ c = FFmpeg::AVBase::_CreateChildObject<FFmpeg::AVFilterContext>(ctx,graph);
 			int r = ret ? *ret : 0;
 			try
@@ -933,7 +930,7 @@ FFmpeg::AVClass^ FFmpeg::AVFilterGraph::av_class::get()
 }
 FFmpeg::AVFilterGraph::AVFiltersArray^ FFmpeg::AVFilterGraph::filters::get()
 {
-	AVFiltersArray^ _array = _CreateObject<AVFiltersArray>((void*)((::AVFilterGraph*)m_pPointer)->filters);
+	AVFiltersArray^ _array = _CreateObject<AVFiltersArray>(((::AVFilterGraph*)m_pPointer)->filters);
 	if (_array)
 	{
 		_array->m_pnCount = &((::AVFilterGraph*)m_pPointer)->nb_filters;
@@ -1095,7 +1092,7 @@ FFmpeg::AVFilterContext^ FFmpeg::AVFilterGraph::AllocFilter(AVFilter^ filter, St
 	try
 	{
 		szName = (char*)AllocString(name).ToPointer();
-		auto p = avfilter_graph_alloc_filter(((::AVFilterGraph*)m_pPointer), (const ::AVFilter*)filter->_Pointer.ToPointer(), szName);
+		auto p = avfilter_graph_alloc_filter((::AVFilterGraph*)m_pPointer, (const ::AVFilter*)filter->_Pointer.ToPointer(), szName);
 		AVFilterContext^ context = _CreateObject<AVFilterContext>(p);
 		if (context != nullptr)
 		{
@@ -1136,7 +1133,7 @@ FFmpeg::AVRESULT FFmpeg::AVFilterGraph::CreateFilter(AVFilterContext^ % context,
 		::AVFilterContext * p = nullptr;
 		szName = (char*)AllocString(name).ToPointer();
 		szArgs = (char*)AllocString(args).ToPointer();
-		result = avfilter_graph_create_filter(&p,(const ::AVFilter*)filter->_Pointer.ToPointer(),szName,szArgs,opaque.ToPointer(),((::AVFilterGraph*)m_pPointer));
+		result = avfilter_graph_create_filter(&p,(const ::AVFilter*)filter->_Pointer.ToPointer(),szName,szArgs,opaque.ToPointer(),(::AVFilterGraph*)m_pPointer);
 		context = _CreateObject<AVFilterContext>(p);
 	}
 	finally
@@ -1158,7 +1155,7 @@ FFmpeg::AVFilterContext^ FFmpeg::AVFilterGraph::GetFilter(String^ name)
 	try
 	{
 		szName = (char*)AllocString(name).ToPointer();
-		auto p = avfilter_graph_get_filter(((::AVFilterGraph*)m_pPointer),szName);
+		auto p = avfilter_graph_get_filter((::AVFilterGraph*)m_pPointer,szName);
 		_context = _CreateObject<AVFilterContext>(p);
 	}
 	finally
@@ -1178,7 +1175,7 @@ FFmpeg::AVFilterContext^ FFmpeg::AVFilterGraph::CreateFilter(AVFilter^ filter,St
 		szName = (char*)AllocString(name).ToPointer();
 		szArgs = (char*)AllocString(args).ToPointer();
 		::AVFilterContext * p = nullptr;
-		if (0 <= avfilter_graph_create_filter(&p,(const ::AVFilter*)filter->_Pointer.ToPointer(),szName,szArgs,opaque.ToPointer(),((::AVFilterGraph*)m_pPointer)))
+		if (0 <= avfilter_graph_create_filter(&p,(const ::AVFilter*)filter->_Pointer.ToPointer(),szName,szArgs,opaque.ToPointer(),(::AVFilterGraph*)m_pPointer))
 		{
 			_context = _CreateObject<AVFilterContext>(p);
 		}
@@ -1218,7 +1215,7 @@ FFmpeg::AVRESULT FFmpeg::AVFilterGraph::Parse(String^ filters,AVFilterInOut^ inp
 	try
 	{
 		szFilters = (char*)AllocString(filters).ToPointer();
-		return  avfilter_graph_parse(((::AVFilterGraph*)m_pPointer),szFilters,inputs != nullptr ? (::AVFilterInOut*)inputs->_Pointer.ToPointer() : nullptr,outputs != nullptr ? (::AVFilterInOut*)outputs->_Pointer.ToPointer() : nullptr,log_ctx.ToPointer());
+		return  avfilter_graph_parse((::AVFilterGraph*)m_pPointer,szFilters,inputs != nullptr ? (::AVFilterInOut*)inputs->_Pointer.ToPointer() : nullptr,outputs != nullptr ? (::AVFilterInOut*)outputs->_Pointer.ToPointer() : nullptr,log_ctx.ToPointer());
 	}
 	finally
 	{
@@ -1240,7 +1237,7 @@ FFmpeg::AVRESULT FFmpeg::AVFilterGraph::ParsePtr(String^ filters,AVFilterInOut^ 
 	try
 	{
 		szFilters = (char*)AllocString(filters).ToPointer();
-		_result = avfilter_graph_parse_ptr(((::AVFilterGraph*)m_pPointer),szFilters,&_inputs,&_outputs,log_ctx.ToPointer());
+		_result = avfilter_graph_parse_ptr((::AVFilterGraph*)m_pPointer,szFilters,&_inputs,&_outputs,log_ctx.ToPointer());
 		if (_result >= 0)
 		{
 			if (inputs != nullptr) 
@@ -1280,7 +1277,7 @@ FFmpeg::AVRESULT FFmpeg::AVFilterGraph::ParsePtr2(String^ filters, [Out] AVFilte
 	try
 	{
 		szFilters = (char*)AllocString(filters).ToPointer();
-		_result = avfilter_graph_parse_ptr(((::AVFilterGraph*)m_pPointer),szFilters,&_inputs,&_outputs,log_ctx.ToPointer());
+		_result = avfilter_graph_parse_ptr((::AVFilterGraph*)m_pPointer,szFilters,&_inputs,&_outputs,log_ctx.ToPointer());
 		if (_result == 0)
 		{
 			if (_inputs) 
@@ -1315,7 +1312,7 @@ FFmpeg::AVRESULT FFmpeg::AVFilterGraph::Parse2(String^ filters,[Out] AVFilterInO
 	try
 	{
 		szFilters = (char*)AllocString(filters).ToPointer();
-		_result = avfilter_graph_parse2(((::AVFilterGraph*)m_pPointer),szFilters,&_inputs,&_outputs);
+		_result = avfilter_graph_parse2((::AVFilterGraph*)m_pPointer,szFilters,&_inputs,&_outputs);
 		if (_result == 0)
 		{
 			if (_inputs) 
@@ -1424,7 +1421,7 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::AVPixelFormatsEnumerator::MoveN
 	Monitor::Enter(m_pFormats);
 	if (m_nVersion == m_pFormats->m_nVersion)
 	{
-		const ::AVPixelFormat * p = (const ::AVPixelFormat *)m_pFormats->_Pointer.ToPointer();
+		auto p = (const ::AVPixelFormat *)m_pFormats->_Pointer.ToPointer();
 		if (m_nIndex == -1)
 		{
 			if (p) m_nIndex++;
@@ -1438,7 +1435,7 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::AVPixelFormatsEnumerator::MoveN
 		}
 	}
 	Monitor::Exit(m_pFormats);
-	return (idx != m_nIndex);
+	return idx != m_nIndex;
 }
 FFmpeg::AVPixelFormat FFmpeg::AVBufferSinkParams::AVPixelFormats::AVPixelFormatsEnumerator::Current::get()
 {
@@ -1449,7 +1446,7 @@ FFmpeg::AVPixelFormat FFmpeg::AVBufferSinkParams::AVPixelFormats::AVPixelFormats
 	}
 	{
 		Monitor::Enter(m_pFormats);
-		const ::AVPixelFormat * p = (const ::AVPixelFormat *)m_pFormats->_Pointer.ToPointer();
+		auto p = (const ::AVPixelFormat *)m_pFormats->_Pointer.ToPointer();
 		if (m_nVersion != m_pFormats->m_nVersion)
 		{
 			int idx = 0;
@@ -1500,14 +1497,14 @@ FFmpeg::AVPixelFormat FFmpeg::AVBufferSinkParams::AVPixelFormats::default::get(i
 	Monitor::Enter(this);
 	try
 	{
-		auto p = ((::AVPixelFormat *)m_pPointer);
+		auto p = (::AVPixelFormat *)m_pPointer;
 		if (p)
 		{
 			do
 			{
 				if (index-- == 0)
 				{
-					return (AVPixelFormat)*p;
+					return *p;
 				}
 			}
 			while (*p++ != AV_PIX_FMT_NONE);
@@ -1526,7 +1523,7 @@ int FFmpeg::AVBufferSinkParams::AVPixelFormats::Count::get()
 	try
 	{
 		int count = 0;
-		auto p = ((::AVPixelFormat *)m_pPointer);
+		auto p = (::AVPixelFormat *)m_pPointer;
 		if (p)
 		{
 			while (*p++ != AV_PIX_FMT_NONE) count++;
@@ -1548,19 +1545,19 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::EnsureAllocatedPointer(int coun
 		if (m_nAllocated < count)
 		{
 			int size = 0;
-			::AVPixelFormat * old = (::AVPixelFormat *)m_pPointer;
+			auto old = (::AVPixelFormat *)m_pPointer;
 			if (old) { while (old[size] != AV_PIX_FMT_NONE) size++; }
 
-			bool bFree = (m_nAllocated > 0);
+			bool bFree = m_nAllocated > 0;
 			while (m_nAllocated < count) m_nAllocated += 20;
-			::AVPixelFormat * p = (::AVPixelFormat *)AllocMemory(m_nAllocated * sizeof(::AVPixelFormat)).ToPointer();
+			auto p = (::AVPixelFormat *)AllocMemory(m_nAllocated * sizeof(::AVPixelFormat)).ToPointer();
 			if (p)
 			{
 				if (size) memcpy(p,old,size * sizeof(::AVPixelFormat));
 				p[size] = AV_PIX_FMT_NONE;
 				((::AVBufferSinkParams*)m_pParent->_Pointer.ToPointer())->pixel_fmts = p;
 			}
-			bAllocated = (p != nullptr);
+			bAllocated = p != nullptr;
 			if (bFree)
 			{
 				FreeMemory(IntPtr(old));
@@ -1584,7 +1581,7 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::Add(array<AVPixelFormat>^ forma
 			if (Add(format)) added++;
 		}
 	}
-	return (added > 0);
+	return added > 0;
 }
 bool FFmpeg::AVBufferSinkParams::AVPixelFormats::Remove(array<AVPixelFormat>^ formats)
 {
@@ -1596,7 +1593,7 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::Remove(array<AVPixelFormat>^ fo
 			if (Remove(format)) removed++;
 		}
 	}
-	return (removed > 0);
+	return removed > 0;
 }
 bool FFmpeg::AVBufferSinkParams::AVPixelFormats::Add(AVPixelFormat format)
 {
@@ -1605,7 +1602,7 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::Add(AVPixelFormat format)
 	{
 		int count = 0; 
 		{
-			auto p = ((::AVPixelFormat *)m_pPointer);
+			auto p = (::AVPixelFormat *)m_pPointer;
 			if (p)
 			{
 				while (*p != AV_PIX_FMT_NONE)
@@ -1639,12 +1636,12 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::Remove(AVPixelFormat format)
 	try
 	{
 		bool found = false;
-		auto p = ((::AVPixelFormat *)m_pPointer);
+		auto p = (::AVPixelFormat *)m_pPointer;
 		if (p)
 		{
 			while (p[++idx] != AV_PIX_FMT_NONE && !found)
 			{
-				found = (p[idx] == (::AVPixelFormat)format);
+				found = p[idx] == (::AVPixelFormat)format;
 			}
 		}
 		if (!found)return false;
@@ -1660,7 +1657,7 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::Contains(AVPixelFormat format)
 	Monitor::Enter(this);
 	try
 	{
-		auto p = ((::AVPixelFormat *)m_pPointer);
+		auto p = (::AVPixelFormat *)m_pPointer;
 		if (p)
 		{
 			while (*p != AV_PIX_FMT_NONE)
@@ -1685,7 +1682,7 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::RemoveAt(int index)
 	{
 		int count = 0;
 		{
-			auto p = ((::AVPixelFormat *)m_pPointer);
+			auto p = (::AVPixelFormat *)m_pPointer;
 			if (p)
 			{
 				while (p[count] != AV_PIX_FMT_NONE) count++;
@@ -1694,7 +1691,7 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::RemoveAt(int index)
 		}
 		if (EnsureAllocatedPointer(m_nAllocated))
 		{
-			auto p = ((::AVPixelFormat *)m_pPointer);
+			auto p = (::AVPixelFormat *)m_pPointer;
 			for (int i = index; i < count; i++)
 			{
 				p[i] = p[i+1];
@@ -1715,7 +1712,7 @@ bool FFmpeg::AVBufferSinkParams::AVPixelFormats::RemoveAll()
 	try
 	{
 		{
-			auto p = ((::AVPixelFormat *)m_pPointer);
+			auto p = (::AVPixelFormat *)m_pPointer;
 			if (p && *p == AV_PIX_FMT_NONE)
 			{
 				return true;
@@ -1781,7 +1778,7 @@ array<FFmpeg::AVPixelFormat>^ FFmpeg::AVBufferSinkParams::AVPixelFormats::ToArra
 	Monitor::Enter(this);
 	try
 	{
-		List<AVPixelFormat>^ _list = gcnew List<AVPixelFormat>();
+		auto _list = gcnew List<AVPixelFormat>();
 		try
 		{
 			for (int i = 0; i < Count; i++)
@@ -1958,7 +1955,7 @@ int FFmpeg::AVBufferSink::channels::get()
 FFmpeg::AVChannelLayout FFmpeg::AVBufferSink::channel_layout::get()
 {
 	DYNAMIC_DEF_API(AVFilter,uint64_t,m_pContext->inputs[0]->channel_layout,av_buffersink_get_channel_layout,::AVFilterContext *);
-	return (AVChannelLayout)av_buffersink_get_channel_layout((::AVFilterContext *)m_pContext->_Pointer.ToPointer());
+	return av_buffersink_get_channel_layout((::AVFilterContext *)m_pContext->_Pointer.ToPointer());
 }
 int FFmpeg::AVBufferSink::sample_rate::get()
 {
@@ -1977,28 +1974,28 @@ FFmpeg::AVRESULT FFmpeg::AVBufferSink::get_frame(AVFrame^ frame, AVBufferSinkFla
 {
 	DYNAMIC_DEF_API(AVFilter,int,AVERROR(ENOSYS),av_buffersink_get_frame_flags,::AVFilterContext *,::AVFrame*,int);
 	return av_buffersink_get_frame_flags(
-		((::AVFilterContext *)m_pContext->_Pointer.ToPointer()), 
-		((::AVFrame*)frame->_Pointer.ToPointer()),
+		(::AVFilterContext *)m_pContext->_Pointer.ToPointer(), 
+		(::AVFrame*)frame->_Pointer.ToPointer(),
 		(int)flags);
 }
 FFmpeg::AVRESULT FFmpeg::AVBufferSink::get_frame(AVFrame^ frame)
 {
 	DYNAMIC_DEF_API(AVFilter,int,AVERROR(ENOSYS),av_buffersink_get_frame,::AVFilterContext *,::AVFrame*);
 	return av_buffersink_get_frame(
-		((::AVFilterContext *)m_pContext->_Pointer.ToPointer()), 
-		((::AVFrame*)frame->_Pointer.ToPointer()));
+		(::AVFilterContext *)m_pContext->_Pointer.ToPointer(), 
+		(::AVFrame*)frame->_Pointer.ToPointer());
 }
 void FFmpeg::AVBufferSink::set_frame_size(unsigned frame_size)
 {
 	VOID_API(AVFilter,av_buffersink_set_frame_size,::AVFilterContext *,unsigned)
-	av_buffersink_set_frame_size(((::AVFilterContext *)m_pContext->_Pointer.ToPointer()),frame_size);
+	av_buffersink_set_frame_size((::AVFilterContext *)m_pContext->_Pointer.ToPointer(),frame_size);
 }
 FFmpeg::AVRESULT FFmpeg::AVBufferSink::get_samples(AVFrame^ frame, int nb_samples)
 {
 	DYNAMIC_DEF_API(AVFilter,int,AVERROR(ENOSYS),av_buffersink_get_samples,::AVFilterContext *,::AVFrame*,int);
 	return av_buffersink_get_samples(
-		((::AVFilterContext *)m_pContext->_Pointer.ToPointer()), 
-		((::AVFrame*)frame->_Pointer.ToPointer()),nb_samples);
+		(::AVFilterContext *)m_pContext->_Pointer.ToPointer(), 
+		(::AVFrame*)frame->_Pointer.ToPointer(),nb_samples);
 }
 //////////////////////////////////////////////////////
 // AVBufferSrcParameters
@@ -2136,7 +2133,7 @@ FFmpeg::AVRESULT FFmpeg::AVBufferSrc::close(Int64 pts,AVBufferSrcFlags flags)
 {
 	DYNAMIC_DEF_API(AVFilter,int,AVERROR(ENOSYS),av_buffersrc_close,::AVFilterContext *,int64_t,int);
 	return av_buffersrc_close((::AVFilterContext *)m_pContext->_Pointer.ToPointer(),
-		(int64_t)pts,(int)flags);
+		pts,(int)flags);
 }
 unsigned FFmpeg::AVBufferSrc::get_nb_failed_requests()
 {
